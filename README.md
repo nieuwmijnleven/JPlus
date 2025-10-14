@@ -78,18 +78,7 @@ git clone https://github.com/nieuwmijnleven/JPlus.git
 cd JPlus
 ```
 
----
-
-### 3. Build the Project
-
-Use the Gradle wrapper to build the compiler and run examples:
-```bash
-./gradlew build
-```
-
----
-
-### 4. Running Examples
+### 3. Running Examples
 
 To run a specific example file (e.g., NullableType1.jplus), use:
 ```bash
