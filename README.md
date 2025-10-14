@@ -442,6 +442,6 @@ Thank you for helping us build a better, safer, and more productive programming 
 
 ## 📄 License
 
-JPlus is licensed under the [MIT License](./LICENSE).
+JPlus is licensed under the [Apache License 2.0](./LICENSE).
 
 ---
