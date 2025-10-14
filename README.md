@@ -439,3 +439,9 @@ If you want to support the project financially, please visit our sponsorship pag
 Thank you for helping us build a better, safer, and more productive programming language!
 
 ---
+
+## 📄 License
+
+JPlus is licensed under the [MIT License](./LICENSE).
+
+---
