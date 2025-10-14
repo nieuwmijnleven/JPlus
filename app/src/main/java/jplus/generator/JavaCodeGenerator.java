@@ -40,18 +40,16 @@ public class JavaCodeGenerator extends JPlus20ParserBaseVisitor<String> {
     public String visitTopLevelClassOrInterfaceDeclaration(JPlus20Parser.TopLevelClassOrInterfaceDeclarationContext ctx) {
         StringBuilder sb = new StringBuilder();
 
-        var classDeclaration = ctx.classDeclaration();
-        if (classDeclaration != null) {
-            var normalClassDeclaration = classDeclaration.normalClassDeclaration();
+        if (ctx.classDeclaration() != null) {
+            var normalClassDeclaration = ctx.classDeclaration().normalClassDeclaration();
             normalClassDeclaration.classModifier().forEach(classModifier -> sb.append(classModifier.getText()).append(" "));
             sb.append("class").append(" ");
             sb.append(normalClassDeclaration.typeIdentifier().getText());
             sb.append(visit(ctx.classDeclaration()));
-        }
-
-        var interfaceDeclaration = ctx.interfaceDeclaration();
-        if (ctx.interfaceDeclaration() != null) {
-            //System.out.println(ctx.interfaceDeclaration().getText());
+        } else if (ctx.interfaceDeclaration() != null) {
+            ;
+        } else {
+            ;
         }
 
         return sb.toString();
@@ -88,7 +86,6 @@ public class JavaCodeGenerator extends JPlus20ParserBaseVisitor<String> {
         StringBuilder sb = new StringBuilder();
         var unannUnannReferenceType = ctx.unannReferenceType();
         if (unannUnannReferenceType != null) {
-//            sb.append(visit(unannUnannReferenceType.unannTypeVariable()));
             sb.append(unannUnannReferenceType.getText());
         }
 
@@ -124,7 +121,6 @@ public class JavaCodeGenerator extends JPlus20ParserBaseVisitor<String> {
     @Override
     public String visitLiteral(JPlus20Parser.LiteralContext ctx) {
         StringBuilder sb = new StringBuilder();
-
         if (ctx.IntegerLiteral() != null) {
             sb.append(ctx.IntegerLiteral().getText());
         } else if (ctx.FloatingPointLiteral() != null) {
@@ -160,7 +156,6 @@ public class JavaCodeGenerator extends JPlus20ParserBaseVisitor<String> {
         StringBuilder sb = new StringBuilder();
         sb.append("(");
         ctx.expression().forEach(
-                //expression -> sb.append(expression.getText()).append(", ")
                 expression -> sb.append(visit(expression)).append(", ")
         );
         sb.setLength(sb.length()-2);

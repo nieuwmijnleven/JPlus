@@ -19,13 +19,13 @@ dependencies {
 
 tasks.named('generateGrammarSource', AntlrTask).configure {
     arguments += ['-visitor', '-package', 'jplus.base']
-    outputDirectory = file("$buildDir/generated-src/antlr/main/jplus/base")
+    outputDirectory = file("src/main/antlr/generated-src/jplus/base")
 }
 
 sourceSets {
     main {
         java {
-            srcDirs += "$buildDir/generated-src/antlr/main"
+            srcDirs += "src/main/antlr/generated-src"
         }
     }
 }
