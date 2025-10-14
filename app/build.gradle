@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'antlr'
+}
+
+group = 'jplus'
+version = 'mvp'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    antlr 'org.antlr:antlr4:4.12.0'
+    implementation 'org.antlr:antlr4-runtime:4.12.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+tasks.named('generateGrammarSource', AntlrTask).configure {
+    arguments += ['-visitor', '-package', 'jplus.base']
+    outputDirectory = file("$buildDir/generated-src/antlr/main/jplus/base")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += "$buildDir/generated-src/antlr/main"
+        }
+    }
+}
+
+jar {
+    archiveBaseName.set('jplus')
+    archiveVersion.set('')
+    manifest {
+        attributes(
+                'Main-Class' : 'jplus.main.Main'
+        )
+    }
+}
+
+task run(type: JavaExec) {
+    group = 'application'
+    description='Runs with arguments'
+    mainClass.set('jplus.main.Main')
+    classpath = sourceSets.main.runtimeClasspath
+    if (project.hasProperty('args')) {
+        args = project.property('args').split() as List<String>
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

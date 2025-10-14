@@ -1,0 +1,11 @@
+package jplus.example;
+
+public class Main {
+    public static void main(String[] args) {
+        String? s1 = null;
+        String s2 = "jplus";
+
+        s1.length();
+        s2.length();
+    }
+}
