@@ -41,6 +41,16 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
 | **Concise Syntax**            | smart casts and more for clearer and shorter code      |
 
 ---
+
+## 🚧 Project Status: MVP
+
+Please note that **JPlus is currently in its MVP (Minimum Viable Product) stage**.  
+This means the language is still under active development, features may be incomplete or subject to change, and bugs may exist.
+
+We welcome feedback, bug reports, and contributions from the community to help shape and improve JPlus into a stable and powerful language.
+
+---
+
 ## ⚙️ Installation & Execution
 
 Follow these steps to get started with JPlus and run example programs.
