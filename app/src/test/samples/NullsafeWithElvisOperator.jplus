@@ -4,7 +4,7 @@ public class Main {
     public static void main(String[] args) {
         String? s1 = null;
         String s2 = s1 ?: "jplus";
-        System.out.printf("s1 = %s\n", s1 ?: "null-value");
-        System.out.printf("s2 = %s\n", s2);
+        System.out.printf("the length of s1 : %d\n", s1?.length() ?: 0);
+        System.out.printf("the length of s2 : %d\n", s2.length());
     }
 }

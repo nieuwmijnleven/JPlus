@@ -21,6 +21,7 @@ public class Main {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         JPlus20Parser parser = new JPlus20Parser(tokens);
         ParseTree parseTree = parser.start_();
+        //System.out.println(parseTree.toStringTree(parser));
 
         NullabilityChecker nullabilityChecker = new NullabilityChecker();
         nullabilityChecker.visit(parseTree);

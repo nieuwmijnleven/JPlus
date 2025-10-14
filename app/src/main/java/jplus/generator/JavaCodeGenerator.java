@@ -1,5 +1,7 @@
 package jplus.generator;
 
+import com.google.googlejavaformat.java.Formatter;
+import com.google.googlejavaformat.java.FormatterException;
 import jplus.base.JPlus20Parser;
 import jplus.base.JPlus20ParserBaseVisitor;
 
@@ -8,6 +10,16 @@ public class JavaCodeGenerator extends JPlus20ParserBaseVisitor<String> {
     @Override
     protected String aggregateResult(String aggregate, String nextResult) {
         return nextResult == null ? aggregate : nextResult;
+    }
+
+    @Override
+    public String visitCompilationUnit(JPlus20Parser.CompilationUnitContext ctx) {
+        String generated = super.visitCompilationUnit(ctx);
+        try {
+            return new Formatter().formatSource(generated);
+        } catch(FormatterException e) {
+            return generated;
+        }
     }
 
     @Override
@@ -116,6 +128,11 @@ public class JavaCodeGenerator extends JPlus20ParserBaseVisitor<String> {
         sb.append(ctx.variableDeclaratorId().getText()).append(" ").append("=").append(" ");
         sb.append(visit(ctx.variableInitializer()));
         return sb.toString();
+    }
+
+    @Override
+    public String visitIdentifier(JPlus20Parser.IdentifierContext ctx) {
+        return ctx.getText();
     }
 
     @Override
@@ -377,8 +394,10 @@ public class JavaCodeGenerator extends JPlus20ParserBaseVisitor<String> {
 
             if (ctx.NULLSAFE() != null) {
                 StringBuilder nullsafeBuilder = new StringBuilder();
+                nullsafeBuilder.append("(");
                 nullsafeBuilder.append("(").append(variableName).append("!=").append("null").append(")").append("?");
                 nullsafeBuilder.append(sb.toString()).append(":").append("null");
+                nullsafeBuilder.append(")");
                 sb = nullsafeBuilder;
             }
         } else {
@@ -401,9 +420,12 @@ public class JavaCodeGenerator extends JPlus20ParserBaseVisitor<String> {
     @Override
     public String visitNullCoalescingExpression(JPlus20Parser.NullCoalescingExpressionContext ctx) {
         StringBuilder sb = new StringBuilder();
-        String conditionalOrExpression = ctx.conditionalOrExpression().getText();
+//        String conditionalOrExpression = ctx.conditionalOrExpression().getText();
+        String conditionalOrExpression = visit(ctx.conditionalOrExpression());
         String expression = ctx.expression().getText();
-        sb.append("(").append("(").append(conditionalOrExpression).append(")").append("!=").append("null").append(")").append("?").append(conditionalOrExpression).append(":").append(expression);
+        sb.append("(");
+        sb.append("(").append("(").append(conditionalOrExpression).append(")").append("!=").append("null").append(")").append("?").append("(").append(conditionalOrExpression).append(")").append(":").append(expression);
+        sb.append(")");
         return sb.toString();
     }
 }
