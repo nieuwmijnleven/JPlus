@@ -70,6 +70,13 @@ gradle.taskGraph.whenReady { taskGraph ->
         tasks.named('generateGrammarSource').configure {
             enabled = false
         }
+    } else if (taskGraph.hasTask(':app:test')) {
+        tasks.named('generateGrammarSource').configure {
+            enabled = false
+        }
+        tasks.named('generateTestGrammarSource').configure {
+            enabled = false
+        }
     }
 }
 

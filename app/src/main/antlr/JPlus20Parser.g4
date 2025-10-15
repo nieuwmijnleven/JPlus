@@ -1569,15 +1569,16 @@ conditionalOrExpression
 // Paragraph 15.25
 // ---------------
 
-conditionalExpression
+nullCoalescingExpression
     : conditionalOrExpression
-    | conditionalOrExpression '?' expression ':' conditionalExpression
-    | conditionalOrExpression '?' expression ':' lambdaExpression
+    | conditionalOrExpression '?:' nullCoalescingExpression
+    | conditionalOrExpression '?:' lambdaExpression
     ;
 
-nullCoalescingExpression
-    : conditionalOrExpression '?:' expression
-    | conditionalOrExpression '?:' nullCoalescingExpression
+conditionalExpression
+    : nullCoalescingExpression
+    | nullCoalescingExpression '?' expression ':' conditionalExpression
+    | nullCoalescingExpression '?' expression ':' lambdaExpression
     ;
 
 // Paragraph 15.26
@@ -1585,7 +1586,6 @@ nullCoalescingExpression
 
 assignmentExpression
     : conditionalExpression
-    | nullCoalescingExpression
     | assignment
     ;
 

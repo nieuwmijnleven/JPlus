@@ -2849,18 +2849,6 @@ public class JPlus20ParserBaseListener implements JPlus20ParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterNullCoalescingExpression(JPlus20Parser.NullCoalescingExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -2868,6 +2856,18 @@ public class JPlus20ParserBaseListener implements JPlus20ParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitNullCoalescingExpression(JPlus20Parser.NullCoalescingExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

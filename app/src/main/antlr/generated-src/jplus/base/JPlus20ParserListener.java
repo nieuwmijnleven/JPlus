@@ -2368,16 +2368,6 @@ public interface JPlus20ParserListener extends ParseTreeListener {
 	 */
 	void exitConditionalOrExpression(JPlus20Parser.ConditionalOrExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link JPlus20Parser#conditionalExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link JPlus20Parser#conditionalExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link JPlus20Parser#nullCoalescingExpression}.
 	 * @param ctx the parse tree
 	 */
@@ -2387,6 +2377,16 @@ public interface JPlus20ParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNullCoalescingExpression(JPlus20Parser.NullCoalescingExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#conditionalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#conditionalExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link JPlus20Parser#assignmentExpression}.
 	 * @param ctx the parse tree

@@ -3,7 +3,7 @@ public class Main {
     public static void main(String[] args) {
         String? s1 = null;
         String s2 = s1 ?: "jplus";
-        System.out.printf("s1 = %s\n", s1 ?: "null-value");
+        System.out.printf("s1 = %s\n", s1 ?: s2 ?: "null-value");
         System.out.printf("s2 = %s\n", s2);
     }
 }

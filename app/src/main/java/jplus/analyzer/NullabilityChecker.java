@@ -5,6 +5,8 @@ import jplus.base.JPlus20ParserBaseVisitor;
 import jplus.base.SymbolTable;
 import jplus.base.TypeInfo;
 import jplus.base.VariableInfo;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.Interval;
 
 public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
@@ -12,16 +14,20 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
     private boolean hasPassed = true;
 
+    private String getTokenString(ParserRuleContext ctx) {
+        return ctx.start.getTokenSource().getInputStream().getText(Interval.of(ctx.start.getStartIndex(), ctx.stop.getStopIndex()));
+    }
+
     @Override
     public Void visitLocalVariableDeclaration(JPlus20Parser.LocalVariableDeclarationContext ctx) {
-        String typeName = ctx.localVariableType().getText();
+        String typeName = getTokenString(ctx.localVariableType());
 
         var variableDeclaratorContext = ctx.variableDeclaratorList().variableDeclarator().get(0);
-        String variableName = variableDeclaratorContext.variableDeclaratorId().getText();
+        String variableName = getTokenString(variableDeclaratorContext.variableDeclaratorId());
 
         String expression = "null";
         if (variableDeclaratorContext.variableInitializer() != null) {
-            expression = variableDeclaratorContext.variableInitializer().getText();
+            expression = getTokenString(variableDeclaratorContext.variableInitializer());
         }
 
         boolean nullable = typeName.endsWith("?");
@@ -42,8 +48,8 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
     @Override
     public Void visitMethodInvocation(JPlus20Parser.MethodInvocationContext ctx) {
         if (ctx.typeName() != null) {
-            String instanceName = ctx.typeName().getText();
-            String methodName = ctx.identifier().getText();
+            String instanceName = getTokenString(ctx.typeName());
+            String methodName = getTokenString(ctx.identifier());
             boolean nullsafe = ctx.NULLSAFE() != null;
 
             VariableInfo variableInfo = symbolTable.resolve(instanceName);
@@ -63,8 +69,8 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
     @Override
     public Void visitPrimaryNoNewArray(JPlus20Parser.PrimaryNoNewArrayContext ctx) {
         if (ctx.typeName() != null) {
-            String instanceName = ctx.typeName().getText();
-            String methodName = ctx.identifier().getText();
+            String instanceName = getTokenString(ctx.typeName());
+            String methodName = getTokenString(ctx.identifier());
             boolean nullsafe = ctx.NULLSAFE() != null;
 
             VariableInfo variableInfo = symbolTable.resolve(instanceName);

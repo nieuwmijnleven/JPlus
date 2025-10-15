@@ -11,6 +11,8 @@ public class TestExample {
         ++count;
     }
 
+    public void shift() { count = count >> 2; }
+
     public void printCount() {
         if (count > 0) {
             System.out.println("Count: " + count);

@@ -1427,17 +1427,17 @@ public interface JPlus20ParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConditionalOrExpression(JPlus20Parser.ConditionalOrExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link JPlus20Parser#conditionalExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link JPlus20Parser#nullCoalescingExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitNullCoalescingExpression(JPlus20Parser.NullCoalescingExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#conditionalExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConditionalExpression(JPlus20Parser.ConditionalExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JPlus20Parser#assignmentExpression}.
 	 * @param ctx the parse tree
