@@ -58,6 +58,21 @@ task run(type: JavaExec) {
     ]
 }
 
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(':app:build')) {
+        tasks.named('generateGrammarSource').configure {
+            enabled = false
+        }
+        tasks.named('generateTestGrammarSource').configure {
+            enabled = false
+        }
+    } else if (taskGraph.hasTask(':app:run')) {
+        tasks.named('generateGrammarSource').configure {
+            enabled = false
+        }
+    }
+}
+
 test {
     useJUnitPlatform()
     jvmArgs += [
