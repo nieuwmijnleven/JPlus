@@ -49,6 +49,8 @@ This means the language is still under active development, features may be incom
 
 We welcome feedback, bug reports, and contributions from the community to help shape and improve JPlus into a stable and powerful language.
 
+[💸 Support me on PayPal](https://paypal.me/nieuwmijnleven/20)
+
 ---
 
 ## ⚙️ Installation & Execution
