@@ -468,6 +468,86 @@ public interface JPlus20ParserListener extends ParseTreeListener {
 	 */
 	void exitStaticImportOnDemandDeclaration(JPlus20Parser.StaticImportOnDemandDeclarationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#applyDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterApplyDeclaration(JPlus20Parser.ApplyDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#applyDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitApplyDeclaration(JPlus20Parser.ApplyDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#applyStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterApplyStatement(JPlus20Parser.ApplyStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#applyStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitApplyStatement(JPlus20Parser.ApplyStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#applyBlock}.
+	 * @param ctx the parse tree
+	 */
+	void enterApplyBlock(JPlus20Parser.ApplyBlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#applyBlock}.
+	 * @param ctx the parse tree
+	 */
+	void exitApplyBlock(JPlus20Parser.ApplyBlockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#applyFeatureList}.
+	 * @param ctx the parse tree
+	 */
+	void enterApplyFeatureList(JPlus20Parser.ApplyFeatureListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#applyFeatureList}.
+	 * @param ctx the parse tree
+	 */
+	void exitApplyFeatureList(JPlus20Parser.ApplyFeatureListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#applyFeature}.
+	 * @param ctx the parse tree
+	 */
+	void enterApplyFeature(JPlus20Parser.ApplyFeatureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#applyFeature}.
+	 * @param ctx the parse tree
+	 */
+	void exitApplyFeature(JPlus20Parser.ApplyFeatureContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#applyFeatureArgs}.
+	 * @param ctx the parse tree
+	 */
+	void enterApplyFeatureArgs(JPlus20Parser.ApplyFeatureArgsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#applyFeatureArgs}.
+	 * @param ctx the parse tree
+	 */
+	void exitApplyFeatureArgs(JPlus20Parser.ApplyFeatureArgsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#applyBlockEntry}.
+	 * @param ctx the parse tree
+	 */
+	void enterApplyBlockEntry(JPlus20Parser.ApplyBlockEntryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#applyBlockEntry}.
+	 * @param ctx the parse tree
+	 */
+	void exitApplyBlockEntry(JPlus20Parser.ApplyBlockEntryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JPlus20Parser#qualifiedName}.
+	 * @param ctx the parse tree
+	 */
+	void enterQualifiedName(JPlus20Parser.QualifiedNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JPlus20Parser#qualifiedName}.
+	 * @param ctx the parse tree
+	 */
+	void exitQualifiedName(JPlus20Parser.QualifiedNameContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link JPlus20Parser#topLevelClassOrInterfaceDeclaration}.
 	 * @param ctx the parse tree
 	 */

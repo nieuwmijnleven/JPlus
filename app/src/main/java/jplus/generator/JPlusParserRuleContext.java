@@ -1,9 +1,8 @@
 package jplus.generator;
 
-import jplus.base.JPlus20Parser.NullCoalescingExpressionContext;
-import jplus.base.JPlus20Parser.UnannTypeContext;
-import jplus.base.JPlus20Parser.PrimaryNoNewArrayContext;
+import jplus.base.JPlus20Parser.*;
 import jplus.util.FragmentedText;
+import jplus.util.Utils;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 
@@ -15,74 +14,103 @@ public class JPlusParserRuleContext extends ParserRuleContext {
 
     private final Map<TextChangeRange, String> textChangeRangeStringMap = new HashMap<>();
 
+    private final CodeGeneratorContext codeGeneratorCtx = CodeGeneratorContext.getInstance();
+
     public JPlusParserRuleContext(ParserRuleContext parent, int invokingStateNumber) {
         super(parent, invokingStateNumber);
     }
 
     public Optional<JPlusParserRuleContext> _getParent() {
-        return Optional.ofNullable((JPlusParserRuleContext)this.parent);
+        return Optional.ofNullable((JPlusParserRuleContext) this.parent);
     }
 
     @Override
     public String getText() {
-        if (this instanceof UnannTypeContext) {
-            UnannTypeContext ctx = (UnannTypeContext)this;
-            if (ctx.unannReferenceType() != null) {
-                TextChangeRange range = getTextChangeRange(ctx);
-                String replaced = ctx.unannReferenceType().getText();
-                _getParent().ifPresent(parent ->{
-                    parent.addTextChangeRange(range, replaced);
-                });
-                return ctx.unannReferenceType().getText();
-            }
-        } else if (this instanceof NullCoalescingExpressionContext) {
-            NullCoalescingExpressionContext ctx = (NullCoalescingExpressionContext) this;
-            if (ctx.ELVIS() != null) {
-                StringBuilder sb = new StringBuilder();
-                String conditionalOrExpression = ctx.conditionalOrExpression().getText();
-                String expression = "null";
-                if (ctx.nullCoalescingExpression() != null) {
-                    expression = ctx.nullCoalescingExpression().getText();
-                } else if (ctx.lambdaExpression() != null) {
-                    expression = ctx.lambdaExpression().getText();
-                }
+        if (this instanceof Start_Context startContextCtx) {
+            String original = getTokenString(startContextCtx);
+            codeGeneratorCtx.setOriginal(original);
 
-                sb.append("(");
-                sb.append("(").append("(").append(conditionalOrExpression).append(")").append("!=").append("null").append(")").append("?").append("(").append(conditionalOrExpression).append(")").append(":").append("(").append(expression).append(")");
-                sb.append(")");
-
-                TextChangeRange range = getTextChangeRange(ctx);
-                String replaced = sb.toString();
-                _getParent().ifPresent(parent -> {
-                    parent.addTextChangeRange(range, replaced);
-                });
-                return replaced;
-            }
-        } else if (this instanceof PrimaryNoNewArrayContext) {
-            PrimaryNoNewArrayContext ctx = (PrimaryNoNewArrayContext)this;
-            if (ctx.NULLSAFE() != null) {
-                StringBuilder sb = new StringBuilder();
-                String tokenString = getTokenString(ctx).replace("?.", ".");
-                String variableName = tokenString.split("\\.")[0];
-                sb.append("(");
-                sb.append("(").append('(').append(variableName).append(')').append("!=").append("null").append(")").append("?");
-                sb.append('(').append(tokenString).append(')').append(":").append("null");
-                sb.append(")");
-
-                TextChangeRange range = getTextChangeRange(ctx);
-                String replaced = sb.toString();
-                _getParent().ifPresent(parent -> {
-                    parent.addTextChangeRange(range, replaced);
-                });
-                return replaced;
-            }
+            TextChangeRange range = getTextChangeRange(startContextCtx);
+            String generated = processDefaultText();
+            codeGeneratorCtx.setFragmentedText(new FragmentedText(range, generated));
+            return generated;
+        } else if (this instanceof ApplyDeclarationContext ApplyDeclarationCtx) {
+            TextChangeRange range = getTextChangeRange(ApplyDeclarationCtx);
+            String replaced = getTokenString(ApplyDeclarationCtx).replaceFirst("^", "//").replaceAll("\n", "\n//");
+            _getParent().ifPresent(parent -> parent.addTextChangeRange(range, replaced));
+            return null;
+        } else if (this instanceof UnannTypeContext unannTypeCtx && unannTypeCtx.unannReferenceType() != null) {
+            return replaceNullType(unannTypeCtx);
+        } else if (this instanceof NullCoalescingExpressionContext nullCoalescingCtx && nullCoalescingCtx.ELVIS() != null) {
+            return replaceElvisOperator(nullCoalescingCtx);
+        } else if (this instanceof PrimaryNoNewArrayContext primaryCtx && primaryCtx.NULLSAFE() != null) {
+            return replaceNullsafeOperator(primaryCtx);
+        } else if (this instanceof FieldAccessContext fieldAccessCtx && fieldAccessCtx.NULLSAFE() != null) {
+            return replaceNullsafeOperator(fieldAccessCtx);
+        } else if (this instanceof MethodInvocationContext methodInvocationCtx && methodInvocationCtx.NULLSAFE() != null) {
+            return replaceNullsafeOperator(methodInvocationCtx);
         }
 
-        String originalString = this.start.getTokenSource().getInputStream().getText(Interval.of(this.start.getStartIndex(), this.stop.getStopIndex()));
+        return processDefaultText();
+    }
 
+    private String replaceNullType(UnannTypeContext ctx) {
+        String original = getTokenString(ctx);
+        if (ctx.QUESTION() != null) {
+            String replaced = original.substring(0, original.length()-1);
+            TextChangeRange range = getTextChangeRange(ctx);
+            _getParent().ifPresent(parent -> parent.addTextChangeRange(range, replaced));
+            return replaced;
+        }
+        return original;
+    }
 
-        for (int i = 0; i < this.getChildCount(); i++) {
-            this.getChild(i).getText();
+    private String replaceElvisOperator(NullCoalescingExpressionContext ctx) {
+        String conditionalOrExpression = ctx.conditionalOrExpression().getText();
+        String expression = "null";
+
+        if (ctx.nullCoalescingExpression() != null) {
+            expression = ctx.nullCoalescingExpression().getText();
+        } else if (ctx.lambdaExpression() != null) {
+            expression = ctx.lambdaExpression().getText();
+        }
+
+        String replaced = "(" +
+                "((" + conditionalOrExpression + ")!=null)?" +
+                "(" + conditionalOrExpression + "):" +
+                "(" + expression + ")" +
+                ")";
+
+        TextChangeRange range = getTextChangeRange(ctx);
+        _getParent().ifPresent(parent -> parent.addTextChangeRange(range, replaced));
+
+        return replaced;
+    }
+
+    private String replaceNullsafeOperator(ParserRuleContext ctx) {
+        String tokenString = getTokenString(ctx).replace("?.", ".");
+        String variableName = tokenString.split("\\.")[0];
+
+        String replaced = "(" +
+                "((" + variableName + ")!=null)?" +
+                "(" + tokenString + "):" +
+                "null" +
+                ")";
+
+//        System.out.println("replaced = " + replaced);
+
+        TextChangeRange range = getTextChangeRange(ctx);
+        _getParent().ifPresent(parent -> parent.addTextChangeRange(range, replaced));
+
+        return replaced;
+    }
+
+    private String processDefaultText() {
+        String originalString = getTokenString(this);
+
+        // force children to compute text and update map if needed
+        for (int i = 0; i < getChildCount(); i++) {
+            getChild(i).getText();
         }
 
         if (textChangeRangeStringMap.isEmpty()) {
@@ -91,25 +119,21 @@ public class JPlusParserRuleContext extends ParserRuleContext {
 
         TextChangeRange range = getTextChangeRange(this);
         FragmentedText fragmentedText = new FragmentedText(range, originalString);
-        textChangeRangeStringMap.forEach((textChangeRange, replaced) -> {
-            fragmentedText.update(textChangeRange, replaced);
-        });
-        _getParent().ifPresent(parent -> {
-            parent.addTextChangeRange(range, fragmentedText.toString());
-        });
+//        FragmentedText fragmentedText = codeGeneratorCtx.getFragmentedText();
+        textChangeRangeStringMap.forEach(fragmentedText::update);
+        _getParent().ifPresent(parent -> parent.addTextChangeRange(range, fragmentedText.toString()));
         return fragmentedText.toString();
     }
 
     private TextChangeRange getTextChangeRange(ParserRuleContext ctx) {
-        int startLine = ctx.start.getLine();
-        int startIndex = ctx.start.getCharPositionInLine();
-        int endLine = ctx.stop.getLine();
-        int endIndex = ctx.stop.getCharPositionInLine() + this.stop.getText().length() - 1;
-        return new TextChangeRange(startLine, startIndex, endLine, endIndex);
+        int startOffset = ctx.start.getStartIndex();
+        int endOffset = ctx.stop.getStopIndex();
+        return Utils.computeTextChangeRange(codeGeneratorCtx.getOriginal(), startOffset, endOffset);
     }
 
     private String getTokenString(ParserRuleContext ctx) {
-        return ctx.start.getTokenSource().getInputStream().getText(Interval.of(ctx.start.getStartIndex(), ctx.stop.getStopIndex()));
+        return ctx.start.getTokenSource().getInputStream().getText(
+                Interval.of(ctx.start.getStartIndex(), ctx.stop.getStopIndex()));
     }
 
     public void addTextChangeRange(TextChangeRange range, String replaced) {
@@ -120,4 +144,3 @@ public class JPlusParserRuleContext extends ParserRuleContext {
         return super.getText();
     }
 }
-

@@ -2,15 +2,15 @@ package jplus.analyzer;
 
 import jplus.base.JPlus20Parser;
 import jplus.base.JPlus20ParserBaseVisitor;
+import jplus.base.SymbolInfo;
 import jplus.base.SymbolTable;
 import jplus.base.TypeInfo;
-import jplus.base.VariableInfo;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 
 public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
-    private final SymbolTable symbolTable = new SymbolTable();
+    private final SymbolTable symbolTable = new SymbolTable(null);
 
     private boolean hasPassed = true;
 
@@ -31,14 +31,13 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
         }
 
         boolean nullable = typeName.endsWith("?");
-        TypeInfo typeInfo = new TypeInfo(typeName, nullable);
-        VariableInfo variableInfo = new VariableInfo(typeInfo, variableName);
-        symbolTable.declare(variableName, variableInfo);
+        TypeInfo typeInfo = new TypeInfo(typeName, nullable, TypeInfo.Type.Unknown);
+        symbolTable.declare(variableName, new SymbolInfo(typeInfo, null, null));
 
-        if (!variableInfo.isNullable() && "null".equals(expression)) {
+        if (!typeInfo.isNullable() && "null".equals(expression)) {
             int line = ctx.getStart().getLine();
             int column = ctx.getStart().getCharPositionInLine();
-            System.out.printf("Error: (line:%d, column:%d) %s is a non-nullable variable. But null value is assigned to it.\n", line, column, variableInfo.getName());
+            System.out.printf("Error: (line:%d, column:%d) %s is a non-nullable variable. But null value is assigned to it.\n", line, column, variableName);
             hasPassed = false;
         }
 
@@ -52,11 +51,11 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
             String methodName = getTokenString(ctx.identifier());
             boolean nullsafe = ctx.NULLSAFE() != null;
 
-            VariableInfo variableInfo = symbolTable.resolve(instanceName);
-            if (variableInfo != null && variableInfo.isNullable() && !nullsafe) {
+            SymbolInfo symbolInfo = symbolTable.resolve(instanceName);
+            if (symbolInfo != null && symbolInfo.getTypeInfo().isNullable() && !nullsafe) {
                 int line = ctx.getStart().getLine();
                 int column = ctx.getStart().getCharPositionInLine();
-                System.out.printf("Error: (line:%d, column:%d) %s is a nullable variable. But it direct accesses to %s(). You must consider to use null-safe operator(?.)\n", line, column, variableInfo.getName(), methodName);
+                System.out.printf("Error: (line:%d, column:%d) %s is a nullable variable. But it direct accesses to %s(). You must consider to use null-safe operator(?.)\n", line, column, instanceName, methodName);
                 hasPassed = false;
             }
         } else {
@@ -73,11 +72,11 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
             String methodName = getTokenString(ctx.identifier());
             boolean nullsafe = ctx.NULLSAFE() != null;
 
-            VariableInfo variableInfo = symbolTable.resolve(instanceName);
-            if (variableInfo != null && variableInfo.isNullable() && !nullsafe) {
+            SymbolInfo symbolInfo = symbolTable.resolve(instanceName);
+            if (symbolInfo != null && symbolInfo.getTypeInfo().isNullable() && !nullsafe) {
                 int line = ctx.getStart().getLine();
                 int column = ctx.getStart().getCharPositionInLine();
-                System.out.printf("Error: (line:%d, column:%d) %s is a nullable variable. But it direct accesses to %s(). You must consider to use null-safe operator(?.)\n", line, column, variableInfo.getName(), methodName);
+                System.out.printf("Error: (line:%d, column:%d) %s is a nullable variable. But it direct accesses to %s(). You must consider to use null-safe operator(?.)\n", line, column, instanceName, methodName);
                 hasPassed = false;
             }
         } else {

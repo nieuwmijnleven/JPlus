@@ -27,6 +27,7 @@ YIELD      : 'yield';
 // §3.9 Keywords
 
 ABSTRACT     : 'abstract';
+APPLY        : 'apply';
 ASSERT       : 'assert';
 BOOLEAN      : 'boolean';
 BREAK        : 'break';

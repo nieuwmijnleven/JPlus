@@ -279,7 +279,7 @@ compilationUnit
     ;
 
 ordinaryCompilationUnit
-    : packageDeclaration? importDeclaration* topLevelClassOrInterfaceDeclaration*
+    : packageDeclaration? importDeclaration* applyDeclaration* topLevelClassOrInterfaceDeclaration*
     ;
 
 modularCompilationUnit
@@ -321,6 +321,39 @@ singleStaticImportDeclaration
 
 staticImportOnDemandDeclaration
     : 'import' 'static' typeName '.' '*' ';'
+    ;
+
+applyDeclaration
+    : applyStatement ';'
+    | applyBlock
+    ;
+
+applyStatement
+    : 'apply' applyFeatureList
+    ;
+
+applyBlock
+    : 'apply' '{' applyBlockEntry (',' applyBlockEntry)* '}'
+    ;
+
+applyFeatureList
+    : applyFeature (',' applyFeature)*
+    ;
+
+applyFeature
+    : identifier ('(' applyFeatureArgs ')')?
+    ;
+
+applyFeatureArgs
+    : identifier (',' identifier)*
+    ;
+
+applyBlockEntry
+    : qualifiedName ':' applyFeatureList ';'
+    ;
+
+qualifiedName
+    : identifier ('.' identifier)*
     ;
 
 // Paragraph 7.6
@@ -1271,19 +1304,19 @@ primaryNoNewArray
     | typeName '.' 'this' pNNA?
     | '(' expression ')' pNNA?
     | unqualifiedClassInstanceCreationExpression pNNA?
-    | expressionName '.' unqualifiedClassInstanceCreationExpression pNNA?
-    | arrayCreationExpression '.' unqualifiedClassInstanceCreationExpression pNNA?
-    | arrayCreationExpression '.' identifier pNNA?
-    | 'super' '.' identifier pNNA?
-    | typeName '.' 'super' '.' identifier pNNA?
+    | expressionName ('.' | '?.') unqualifiedClassInstanceCreationExpression pNNA?
+    | arrayCreationExpression ('.' | '?.') unqualifiedClassInstanceCreationExpression pNNA?
+    | arrayCreationExpression ('.' | '?.') identifier pNNA?
+    | 'super' ('.' | '?.') identifier pNNA?
+    | typeName '.' 'super' ('.' | '?.') identifier pNNA?
     | expressionName '[' expression ']' pNNA?
     | arrayCreationExpressionWithInitializer '[' expression ']' pNNA?
     | methodName '(' argumentList? ')' pNNA?
     | typeName ('.'|'?.') typeArguments? identifier '(' argumentList? ')' pNNA?
     | expressionName ('.'|'?.') typeArguments? identifier '(' argumentList? ')' pNNA?
-    | arrayCreationExpression '.' typeArguments? identifier '(' argumentList? ')' pNNA?
-    | 'super' '.' typeArguments? identifier '(' argumentList? ')' pNNA?
-    | typeName '.' 'super' '.' typeArguments? identifier '(' argumentList? ')' pNNA?
+    | arrayCreationExpression ('.' | '?.') typeArguments? identifier '(' argumentList? ')' pNNA?
+    | 'super' ('.' | '?.') typeArguments? identifier '(' argumentList? ')' pNNA?
+    | typeName '.' 'super' ('.' | '?.') typeArguments? identifier '(' argumentList? ')' pNNA?
     | expressionName '::' typeArguments? identifier pNNA?
     | arrayCreationExpression '::' typeArguments? identifier pNNA?
     | referenceType '::' typeArguments? identifier pNNA?
@@ -1294,7 +1327,7 @@ primaryNoNewArray
     ;
 
 pNNA
-    : '.' unqualifiedClassInstanceCreationExpression pNNA?
+    : ('.'|'?.') unqualifiedClassInstanceCreationExpression pNNA?
     | ('.'|'?.') identifier pNNA?
     | '[' expression ']' pNNA?
     | ('.'|'?.') typeArguments? identifier '(' argumentList? ')' pNNA?
@@ -1367,8 +1400,8 @@ arrayAccess
 
 fieldAccess
     : primary ('.'|'?.') identifier
-    | 'super' '.' identifier
-    | typeName '.' 'super' '.' identifier
+    | 'super' ('.'|'?.') identifier
+    | typeName '.' 'super' ('.'|'?.') identifier
     ;
 
 // Paragraph 15.12
@@ -1379,8 +1412,8 @@ methodInvocation
     | typeName ('.'|'?.') typeArguments? identifier '(' argumentList? ')'
     | expressionName ('.'|'?.') typeArguments? identifier '(' argumentList? ')'
     | primary ('.'|'?.') typeArguments? identifier '(' argumentList? ')'
-    | 'super' '.' typeArguments? identifier '(' argumentList? ')'
-    | typeName '.' 'super' '.' typeArguments? identifier '(' argumentList? ')'
+    | 'super' ('.'|'?.') typeArguments? identifier '(' argumentList? ')'
+    | typeName '.' 'super' ('.'|'?.') typeArguments? identifier '(' argumentList? ')'
     ;
 
 argumentList

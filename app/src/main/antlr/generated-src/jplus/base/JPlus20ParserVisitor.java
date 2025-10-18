@@ -287,6 +287,54 @@ public interface JPlus20ParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStaticImportOnDemandDeclaration(JPlus20Parser.StaticImportOnDemandDeclarationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#applyDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitApplyDeclaration(JPlus20Parser.ApplyDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#applyStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitApplyStatement(JPlus20Parser.ApplyStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#applyBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitApplyBlock(JPlus20Parser.ApplyBlockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#applyFeatureList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitApplyFeatureList(JPlus20Parser.ApplyFeatureListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#applyFeature}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitApplyFeature(JPlus20Parser.ApplyFeatureContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#applyFeatureArgs}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitApplyFeatureArgs(JPlus20Parser.ApplyFeatureArgsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#applyBlockEntry}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitApplyBlockEntry(JPlus20Parser.ApplyBlockEntryContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link JPlus20Parser#qualifiedName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitQualifiedName(JPlus20Parser.QualifiedNameContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link JPlus20Parser#topLevelClassOrInterfaceDeclaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

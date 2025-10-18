@@ -62,6 +62,44 @@ class FragmentedTextTest {
     }
 
     @Test
+    void testUpdateMultiLine2() throws IOException {
+        //String text = Files.readString(Paths.get("./src/test/samples/ElvisOperator.jplus"));
+        //TextChangeRange textRange = new TextChangeRange(1,0, 9,0);
+        TextChangeRange textRange = new TextChangeRange(6, 0, 9, 0);
+        String text = "apply {\n" +
+                "    User: data, builder;\n" +
+                "    User.Profile: data, constructors(all);\n" +
+                "}";
+        FragmentedText fragmentedText = new FragmentedText(textRange, text);
+        assertEquals(text, fragmentedText.toString());
+
+        TextChangeRange range = new TextChangeRange(6, 0, 9, 0);
+        String replaced = "";
+        fragmentedText.update(range, replaced);
+        //System.out.println(stringVersion.toString());
+        assertEquals(replaced, fragmentedText.toString());
+    }
+
+//    @Test
+//    void testUpdateMultiLine3() throws IOException {
+//        //String text = Files.readString(Paths.get("./src/test/samples/ElvisOperator.jplus"));
+//        //TextChangeRange textRange = new TextChangeRange(1,0, 9,0);
+//        TextChangeRange textRange = new TextChangeRange(6, 0, 9, 0);
+//        String text = "apply {\n" +
+//                "    User: data, builder;\n" +
+//                "    User.Profile: data, constructors(all);\n" +
+//                "}";
+//        FragmentedText fragmentedText = new FragmentedText(textRange, text);
+//        assertEquals(text, fragmentedText.toString());
+//
+//        TextChangeRange range = new TextChangeRange(6, 0, 9, 0);
+//        String replaced = null;
+//        fragmentedText.update(range, null);
+//        //System.out.println(stringVersion.toString());
+//        assertEquals(replaced, fragmentedText.toString());
+//    }
+
+    @Test
     void testToString() {
     }
 }

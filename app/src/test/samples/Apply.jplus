@@ -1,0 +1,26 @@
+package com.example;
+
+import java.lang.*;
+
+apply getter, setter;
+apply {
+//    User.Profile: data, constructors(no, all);
+    User.Profile: getter, setter;
+}
+public class User {
+    String name;
+    int age;
+
+    public class Profile {
+        String nickname;
+    }
+
+    public String toString() {
+        return name + ", " + age;
+    }
+
+    public static void main(String[] args) {
+        User user = new User();
+        System.out.println(user.toString());
+    }
+}
