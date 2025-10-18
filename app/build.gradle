@@ -13,7 +13,6 @@ repositories {
 dependencies {
     antlr 'org.antlr:antlr4:4.12.0'
     implementation 'org.antlr:antlr4-runtime:4.12.0'
-    implementation 'com.google.googlejavaformat:google-java-format:1.28.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
@@ -49,13 +48,6 @@ task run(type: JavaExec) {
     if (project.hasProperty('args')) {
         args = project.property('args').split() as List<String>
     }
-    jvmArgs += [
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED'
-    ]
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
@@ -82,11 +74,4 @@ gradle.taskGraph.whenReady { taskGraph ->
 
 test {
     useJUnitPlatform()
-    jvmArgs += [
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED',
-            '--add-exports', 'jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED'
-    ]
 }
