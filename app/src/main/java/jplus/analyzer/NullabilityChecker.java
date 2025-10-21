@@ -32,7 +32,7 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
         boolean nullable = typeName.endsWith("?");
         TypeInfo typeInfo = new TypeInfo(typeName, nullable, TypeInfo.Type.Unknown);
-        symbolTable.declare(variableName, new SymbolInfo(typeInfo, null, null));
+        symbolTable.declare(variableName, new SymbolInfo(variableName, typeInfo, null, null));
 
         if (!typeInfo.isNullable() && "null".equals(expression)) {
             int line = ctx.getStart().getLine();

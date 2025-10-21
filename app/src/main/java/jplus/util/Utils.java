@@ -4,6 +4,11 @@ import jplus.generator.TextChangeRange;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.nio.file.Files.lines;
+
 public class Utils {
 
     private Utils() {}
@@ -12,8 +17,47 @@ public class Utils {
         return ctx.start.getTokenSource().getInputStream().getText(Interval.of(ctx.start.getStartIndex(), ctx.stop.getStopIndex()));
     }
 
-    public static String convertToCammel(String s) {
+    public static String indent(String string, int n) {
+        if (string.isEmpty()) {
+            return "";
+        }
+
+        if (n < 0) {
+            throw new IllegalArgumentException("indent must be greater than 0.");
+        }
+
+        if (n == 0) {
+            return string;
+        }
+
+        return " ".repeat(n);
+    }
+
+    public static String indentLines(String string, int n) {
+        if (string.isEmpty()) {
+            return "";
+        }
+
+        if (n < 0) {
+            throw new IllegalArgumentException("indent must be greater than 0.");
+        }
+
+        if (n == 0) {
+            return string;
+        }
+
+        Stream<String> stream = string.lines();
+        final String spaces = " ".repeat(n);
+        stream = stream.map(s -> spaces + s);
+        return stream.collect(Collectors.joining("\n", "", ""));
+    }
+
+    public static String convertToPascalCase(String s) {
         return s.substring(0,1).toUpperCase() + s.substring(1);
+    }
+
+    public static String convertToCamelCase(String s) {
+        return s.substring(0,1).toLowerCase() + s.substring(1);
     }
 
     public static int getIndexFromLineColumn(String text, TextChangeRange range, int targetLine, int targetColumn) {
@@ -153,11 +197,17 @@ public class Utils {
     }
 
 
-    public static TextChangeRange getTextChangeRange(ParserRuleContext ctx) {
-        int startLine = ctx.start.getLine();
-        int startIndex = ctx.start.getCharPositionInLine();
-        int endLine = ctx.stop.getLine();
-        int endIndex = ctx.stop.getCharPositionInLine() + ctx.stop.getText().length() - 1;
-        return new TextChangeRange(startLine, startIndex, endLine, endIndex);
+//    public static TextChangeRange getTextChangeRange(ParserRuleContext ctx) {
+//        int startLine = ctx.start.getLine();
+//        int startIndex = ctx.start.getCharPositionInLine();
+//        int endLine = ctx.stop.getLine();
+//        int endIndex = ctx.stop.getCharPositionInLine() + ctx.stop.getText().length() - 1;
+//        return new TextChangeRange(startLine, startIndex, endLine, endIndex);
+//    }
+
+    public static TextChangeRange getTextChangeRange(String original, ParserRuleContext ctx) {
+        int startOffset = ctx.start.getStartIndex();
+        int endOffset = ctx.stop.getStopIndex();
+        return Utils.computeTextChangeRange(original, startOffset, endOffset);
     }
 }

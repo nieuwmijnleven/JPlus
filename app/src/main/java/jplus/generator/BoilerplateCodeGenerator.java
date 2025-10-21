@@ -1,104 +1,56 @@
 package jplus.generator;
 
-import jplus.base.JPlus20Parser.*;
+import jplus.base.JPlus20Parser.ApplyBlockContext;
+import jplus.base.JPlus20Parser.ApplyDeclarationContext;
+import jplus.base.JPlus20Parser.ApplyFeatureListContext;
+import jplus.base.JPlus20Parser.ApplyStatementContext;
 import jplus.base.JPlus20ParserBaseVisitor;
 import jplus.base.SymbolInfo;
 import jplus.base.SymbolTable;
 import jplus.base.TypeInfo;
+import jplus.generator.apply.ApplyFeature;
+import jplus.generator.apply.ApplyFeatureProcessingContext;
+import jplus.generator.apply.ApplyFeatureProcessor;
+import jplus.generator.apply.ApplyStatement;
+import jplus.generator.apply.BuilderFeatureProcessor;
+import jplus.generator.apply.ConstructorFeatureProcessor;
+import jplus.generator.apply.DataFeatureProcessor;
+import jplus.generator.apply.EqualityFeatureProcessor;
+import jplus.generator.apply.EqualsFeatureProcessor;
+import jplus.generator.apply.GetterFeatureProcessor;
+import jplus.generator.apply.HashCodeFeatureProcessor;
+import jplus.generator.apply.SetterFeatureProcessor;
+import jplus.generator.apply.ToStringFeatureProcessor;
 import jplus.util.FragmentedText;
 import jplus.util.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
 
 public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
 
     private final SymbolTable symbolTable;
     private final List<ApplyStatement> applyStatementList = new ArrayList<>();
     private final CodeGeneratorContext codeGeneratorCtx = CodeGeneratorContext.getInstance();
-
-    // ---------- Nested Static Classes ----------
-
-    public static class ApplyFeature {
-        private final String action;
-        private final List<String> argumentList;
-
-        public ApplyFeature(String action) {
-            this.action = action;
-            this.argumentList = new ArrayList<>();
-        }
-
-        public ApplyFeature(String action, List<String> argumentList) {
-            this(action);
-            this.argumentList.addAll(argumentList);
-        }
-
-        public void addArgument(String argument) {
-            argumentList.add(argument);
-        }
-
-        public String getAction() {
-            return action;
-        }
-
-        public List<String> getArgumentList() {
-            return Collections.unmodifiableList(argumentList);
-        }
-
-        @Override
-        public String toString() {
-            return "ApplyFeature{" +
-                    "action='" + action + '\'' +
-                    ", argumentList=" + argumentList +
-                    '}';
-        }
-    }
-
-    public static class ApplyStatement {
-        private String qualifiedName;
-        private final List<ApplyFeature> featureList;
-
-        public ApplyStatement(String qualifiedName) {
-            this.qualifiedName = qualifiedName;
-            this.featureList = new ArrayList<>();
-        }
-
-        public ApplyStatement(String qualifiedName, List<ApplyFeature> featureList) {
-            this(qualifiedName);
-            this.featureList.addAll(featureList);
-        }
-
-        public void addApplyFeature(ApplyFeature feature) {
-            featureList.add(feature);
-        }
-
-        public void setQualifiedName(String qualifiedName) {
-            this.qualifiedName = qualifiedName;
-        }
-
-        public String getQualifiedName() {
-            return qualifiedName;
-        }
-
-        public List<ApplyFeature> getFeatureList() {
-            return Collections.unmodifiableList(featureList);
-        }
-
-        @Override
-        public String toString() {
-            return "ApplyStatement{" +
-                    "qualifiedName='" + qualifiedName + '\'' +
-                    ", featureList=" + featureList +
-                    '}';
-        }
-    }
-
-    // ---------- Constructor ----------
+    private final Map<String, ApplyFeatureProcessor> strategyMap = new HashMap<>();
 
     public BoilerplateCodeGenerator(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
+        registerStrategies();
+    }
+
+    private void registerStrategies() {
+        strategyMap.put("getter", new GetterFeatureProcessor());
+        strategyMap.put("setter", new SetterFeatureProcessor());
+        strategyMap.put("equals", new EqualsFeatureProcessor());
+        strategyMap.put("equality", new EqualityFeatureProcessor());
+        strategyMap.put("constructor", new ConstructorFeatureProcessor());
+        strategyMap.put("tostring", new ToStringFeatureProcessor());
+        strategyMap.put("hashcode", new HashCodeFeatureProcessor());
+        strategyMap.put("builder", new BuilderFeatureProcessor());
+        strategyMap.put("data", new DataFeatureProcessor());
     }
 
     // ---------- Visitor Override ----------
@@ -116,7 +68,7 @@ public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
     // ---------- Apply Statement Handling ----------
 
     private void handleApplyStatement(ApplyStatementContext ctx) {
-        ApplyStatement applyStatement = getApplyStatement("TopLevelClass", ctx.applyFeatureList());
+        ApplyStatement applyStatement = getApplyStatement("^TopLevelClass$", ctx.applyFeatureList());
         applyStatementList.add(applyStatement);
     }
 
@@ -147,18 +99,17 @@ public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
     // ---------- Code Generation ----------
 
     public String generate() {
-        String topLevelClass = symbolTable.resolve("TopLevelClass").getTypeInfo().getName();
+        String topLevelClass = symbolTable.resolve("^TopLevelClass$").getTypeInfo().getName();
 
         applyStatementList.stream()
-                .filter(stmt -> "TopLevelClass".equals(stmt.getQualifiedName()))
+                .filter(stmt -> "^TopLevelClass$".equals(stmt.getQualifiedName()))
                 .findFirst()
                 .ifPresent(stmt -> stmt.setQualifiedName(topLevelClass));
 
-        AtomicInteger baseIndent = new AtomicInteger(0);
         FragmentedText fragmentedText = codeGeneratorCtx.getFragmentedText();
-
+        int baseIndent = 4;
         for (ApplyStatement applyStatement : applyStatementList) {
-            String qualifiedName = applyStatement.qualifiedName;
+            String qualifiedName = applyStatement.getQualifiedName();
             String[] classNames = qualifiedName.split("\\.");
             String targetClass = classNames[classNames.length - 1];
 
@@ -180,40 +131,55 @@ public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
 
             SymbolTable classSymbolTable = enclosingSymbolTable.getEnclosingSymbolTable(targetClass);
 
-            List<String> fieldList = new ArrayList<>();
-            fieldList.addAll(classSymbolTable.findSymbolsByType(TypeInfo.Type.Primitive));
-            fieldList.addAll(classSymbolTable.findSymbolsByType(TypeInfo.Type.Reference));
+            List<String> fieldList = classSymbolTable.findSymbolsByType(List.of(TypeInfo.Type.Primitive, TypeInfo.Type.Reference));
+            List<String> primitiveTypeFieldList = classSymbolTable.findSymbolsByType(List.of(TypeInfo.Type.Primitive));
+            List<String> referenceTypeFieldList = classSymbolTable.findSymbolsByType(List.of(TypeInfo.Type.Reference));
 
             if (fieldList.isEmpty()) continue;
 
             int indent = classSymbolTable.resolve(fieldList.get(0)).getRange().startIndex();
             if (topLevelClass.equals(targetClass)) {
-                baseIndent.set(indent);
+                baseIndent = indent;
+            }
+            String indentation = Utils.indent(" ", baseIndent);
+            String doubleIndentation = Utils.indent(" ", baseIndent * 2);
+
+            symbolInfo = classSymbolTable.resolve(fieldList.get(fieldList.size()-1));
+            int constructorIndent = symbolInfo.getRange().startIndex();
+            int endLine = symbolInfo.getRange().endLine();
+            int endIndex = symbolInfo.getRange().inclusiveEndIndex() + 1;
+            TextChangeRange constructorRange = new TextChangeRange(endLine, endIndex, endLine, endIndex);
+
+            StringBuilder constructorPartText = new StringBuilder();
+            StringBuilder methodPartText = new StringBuilder();
+
+            ApplyFeatureProcessingContext.Builder builder = ApplyFeatureProcessingContext.builder()
+                    .targetClass(targetClass)
+                    .classSymbolTable(classSymbolTable)
+                    .fieldList(fieldList)
+                    .primitiveFields(primitiveTypeFieldList)
+                    .referenceFields(referenceTypeFieldList)
+                    .indentation(indentation)
+                    .constructorPartText(constructorPartText)
+                    .methodPartText(methodPartText);
+
+            ApplyFeatureProcessingContext context = builder.build();
+            for (ApplyFeature feature : applyStatement.getFeatureList()) {
+                String action = feature.getAction();
+                List<String> arguments = feature.getArgumentList();
+
+                context.setFeature(feature);
+
+                ApplyFeatureProcessor processor = strategyMap.get(action.toLowerCase());
+                if (processor == null) throw new IllegalArgumentException(action + " is not supported");
+                processor.process(context);
             }
 
-            for (ApplyFeature feature : applyStatement.featureList) {
-                String action = feature.action;
-                List<String> arguments = feature.argumentList;
+            String replacedText = Utils.indentLines(methodPartText.toString(), indent) + Utils.indentLines("\n}", indent - baseIndent);
+            fragmentedText.update(newRange, replacedText);
 
-                StringBuilder sb = new StringBuilder();
-
-                if ("getter".equalsIgnoreCase(action)) {
-                    for (String field : fieldList) {
-                        TypeInfo typeInfo = classSymbolTable.resolve(field).getTypeInfo();
-                        String typeName = typeInfo.getName();
-
-                        sb.append("\n")
-                                .append(typeName).append(" get").append(Utils.convertToCammel(field)).append("() {\n")
-                                .append("\treturn ").append(Utils.convertToCammel(field)).append(";\n")
-                                .append("}\n");
-                    }
-
-                    String replacedText = sb.toString().indent(indent) + "}".indent(indent - baseIndent.get());
-                    fragmentedText.update(newRange, replacedText);
-                }
-
-                // TODO: implement setter, builder, etc.
-            }
+            replacedText = Utils.indentLines(constructorPartText.toString(), constructorIndent) + "\n";
+            fragmentedText.update(constructorRange, replacedText);
         }
 
         return fragmentedText.toString();

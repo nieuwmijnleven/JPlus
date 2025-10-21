@@ -124,9 +124,7 @@ public class FragmentedText {
 
         StringBuilder sb = new StringBuilder();
         fragmentedNodeList.forEach(textFragmentNode -> {
-            if (textFragmentNode.string != null) {
-                sb.append(textFragmentNode.string);
-            }
+            sb.append(textFragmentNode.string);
         });
         return sb.toString();
     }

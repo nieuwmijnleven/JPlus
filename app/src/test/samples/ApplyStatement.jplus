@@ -1,0 +1,15 @@
+package com.example;
+
+apply data, constructor(required, all, no), builder;
+apply {
+    User.Profile: getter, setter, equality, constructor(all);
+}
+
+public class User {
+    private String name;
+    private int age;
+
+    public class Profile {
+        String nickname;
+    }
+}

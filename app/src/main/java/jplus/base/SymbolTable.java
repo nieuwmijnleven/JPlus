@@ -1,5 +1,9 @@
 package jplus.base;
 
+import jplus.generator.TextChangeRange;
+import org.w3c.dom.Text;
+
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +27,17 @@ public class SymbolTable {
         return symbolMap.get(name);
     }
 
-    public List<String> findSymbolsByType(TypeInfo.Type type) {
-        return symbolMap.entrySet().stream().filter(entry -> entry.getValue().getTypeInfo().type == type).map(entry -> entry.getKey()).toList();
+    public boolean contains(String symbol, TypeInfo.Type type) {
+        SymbolInfo symbolInfo = resolve(symbol);
+        if (symbolInfo != null && symbolInfo.getTypeInfo().getType() == type) {
+            return true;
+        }
+        return false;
+    }
+
+    public List<String> findSymbolsByType(List<TypeInfo.Type> typeList) {
+        return symbolMap.entrySet().stream().map(Map.Entry::getValue).filter(symbolInfo -> typeList.contains(symbolInfo.getTypeInfo().type)).sorted(
+            Comparator.<SymbolInfo>comparingInt(value -> value.getRange().startLine()).thenComparingInt(value -> value.getRange().startIndex())).map(symbolInfo -> symbolInfo.getSymbol()).toList();
     }
 
     public SymbolTable getParent() {
@@ -38,7 +51,8 @@ public class SymbolTable {
     }
 
     public SymbolTable getEnclosingSymbolTable(String name) {
-        return enclosing.getOrDefault(name, new SymbolTable(this));
+        return enclosing.computeIfAbsent(name, s -> new SymbolTable((this)));
+//        return enclosing.getOrDefault(name, new SymbolTable(this));
     }
 
     @Override

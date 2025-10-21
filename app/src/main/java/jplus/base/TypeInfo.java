@@ -5,11 +5,12 @@ public class TypeInfo {
     public final boolean isNullable;
     public final Type type;
 
-    public static enum Type {
+    public enum Type {
         Class,
         Method,
         Reference,
         Primitive,
+        Constructor,
         Unknown
     }
 
@@ -25,6 +26,10 @@ public class TypeInfo {
 
     public boolean isNullable() {
         return isNullable;
+    }
+
+    public Type getType() {
+        return type;
     }
 
     @Override
