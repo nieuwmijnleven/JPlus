@@ -101,6 +101,8 @@ This means the language is still under active development, features may be incom
 
 We welcome feedback, bug reports, and contributions from the community to help shape and improve JPlus into a stable and powerful language.
 
+[💸 Support me on Github](https://github.com/sponsors/nieuwmijnleven)
+
 [💸 Support me on PayPal](https://paypal.me/nieuwmijnleven/20)
 
 ---
@@ -673,6 +675,8 @@ JPlus is currently in its MVP stage, and your support can make a big difference 
 - We are preparing exclusive perks for sponsors as a token of our gratitude.
 
 If you want to support the project financially, please visit our sponsorship page:
+
+[Become a Sponsor via Github](https://github.com/sponsors/nieuwmijnleven)
 
 [Become a Sponsor via PayPal.me](https://paypal.me/nieuwmijnleven)
 
