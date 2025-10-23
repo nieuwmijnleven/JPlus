@@ -4,6 +4,7 @@ import jplus.analyzer.NullabilityChecker;
 import jplus.base.JPlus20Lexer;
 import jplus.base.JPlus20Parser;
 import jplus.generator.JPlusParserRuleContext;
+import jplus.processor.JPlusProcessor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -15,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -63,20 +65,30 @@ class JPlusTest {
 
     @Test
     void testNullableType1() throws Exception {
-        ParseResult parseResult = createParseTreeFromFile("./src/test/samples/NullableType1.jplus");
-
-        NullabilityChecker nullabilityChecker = new NullabilityChecker();
-        nullabilityChecker.visit(parseResult.parseTree);
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullableType1.jplus"));
+        processor.process();
+        var issues = processor.checkNullability();
+        if (!issues.isEmpty()) {
+            issues.forEach(nullabilityIssue -> {
+                System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
+            });
+            return;
+        }
 
         assertEquals("Error: (line:6, column:8) s2 is a non-nullable variable. But null value is assigned to it.\n", outContent.toString());
     }
 
     @Test
     void testNullableType2() throws Exception {
-        ParseResult parseResult = createParseTreeFromFile("./src/test/samples/NullableType2.jplus");
-
-        NullabilityChecker nullabilityChecker = new NullabilityChecker();
-        nullabilityChecker.visit(parseResult.parseTree);
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullableType2.jplus"));
+        processor.process();
+        var issues = processor.checkNullability();
+        if (!issues.isEmpty()) {
+            issues.forEach(nullabilityIssue -> {
+                System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
+            });
+            return;
+        }
 
         assertEquals("Error: (line:8, column:8) s1 is a nullable variable. But it direct accesses to length(). You must consider to use null-safe operator(?.)\n", outContent.toString());
     }

@@ -8,6 +8,7 @@ import jplus.base.SymbolTable;
 import jplus.base.TypeInfo;
 import jplus.generator.TextChangeRange;
 import jplus.util.Utils;
+import org.antlr.v4.runtime.misc.Interval;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,11 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
 
     @Override
     public Void visitStart_(JPlus20Parser.Start_Context ctx) {
-        this.originalText = Utils.getTokenString(ctx);
+//        System.out.println("[visitStart_] startIndex = " + ctx.start.getStartIndex());
+//        System.out.println("[visitStart_] stopIndex = " + ctx.stop.getStopIndex());
+//        System.out.println("length = " + ctx.start.getInputStream().toString().length());
+//        System.out.println("text = " + ctx.start.getInputStream().toString());
+        this.originalText = ctx.start.getInputStream().toString();
         return super.visitStart_(ctx);
     }
 

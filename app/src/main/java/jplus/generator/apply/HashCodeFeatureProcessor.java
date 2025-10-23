@@ -6,7 +6,7 @@ import jplus.util.Utils;
 public class HashCodeFeatureProcessor implements ApplyFeatureProcessor {
     @Override
     public void process(ApplyFeatureProcessingContext context) {
-        if (context.hasProcessed()) return;
+        if (context.hasProcessed("hashcode")) return;
 
         String methodSymbol = "^hashCode$_";
         if (context.getClassSymbolTable().contains(methodSymbol, TypeInfo.Type.Method)) {
@@ -20,6 +20,7 @@ public class HashCodeFeatureProcessor implements ApplyFeatureProcessor {
         generatedText.append("}\n");
 
         context.appendMethodPartText(generatedText.toString());
-        ApplyFeatureProcessor.super.process(context);
+//        ApplyFeatureProcessor.super.process(context);
+        context.addProcessedAction("hashcode");
     }
 }

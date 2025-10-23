@@ -1,0 +1,46 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>jplus.plugin</id>
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
+    <name>JPlus</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor url="https://github.com/nieuwmijnleven/JPlus">JPlus</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
+    <description><![CDATA[
+        JPlus is a Java superset language running on the JVM.
+  It preserves Java syntax while adding modern features like strict null safety, type inference, and functional programming
+  to significantly boost developer productivity.
+  This IntelliJ plugin provides full language support for editing, compiling, and running JPlus code within the IDE.
+  JPlus allows gradual adoption in existing Java projects, helping you write safer and more concise code.
+    ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <projectListeners>
+        <listener class="jplus.plugin.intellij.JPlusSaveListener" topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
+    </projectListeners>
+
+    <idea-version since-build="251.*" until-build="252.*"/>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <fileTypeFactory implementation="jplus.plugin.intellij.JPlusFileTypeFactory"/>
+        <lang.syntaxHighlighterFactory language="JPlus" implementationClass="jplus.plugin.intellij.JPlusSyntaxHighlighterFactory"/>
+        <completion.contributor language="JPlus" implementationClass="jplus.plugin.intellij.JPlusCompletionContributor"/>
+        <gotoDeclarationHandler implementation="jplus.plugin.intellij.JPlusGotoDefinitionHandler"/>
+        <lang.ast.factory language="JPlus" implementationClass="jplus.plugin.intellij.JPlusASTFactory"/>
+        <lang.parserDefinition language="JPlus" implementationClass="jplus.plugin.intellij.JPlusParserDefinition"/>
+        <lang.commenter language="JPlus" implementationClass="jplus.plugin.intellij.JPlusLanguageCommenter"/>
+        <renamePsiElementProcessor order="first" implementation="jplus.plugin.intellij.JPlusRenameProcessor"/>
+        <annotator language="JPlus" implementationClass="jplus.plugin.intellij.JPlusAnnotator"/>
+    </extensions>
+</idea-plugin>

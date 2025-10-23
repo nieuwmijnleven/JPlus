@@ -10,7 +10,7 @@ import java.util.List;
 public class GetterFeatureProcessor implements ApplyFeatureProcessor {
     @Override
     public void process(ApplyFeatureProcessingContext context) {
-        if (context.hasProcessed()) return;
+        if (context.hasProcessed("getter")) return;
 
         for (String fieldName : context.getFieldList()) {
             String methodName = "get" + Utils.convertToPascalCase(fieldName);
@@ -36,6 +36,7 @@ public class GetterFeatureProcessor implements ApplyFeatureProcessor {
 
             context.appendMethodPartText(methodPartText.toString());
         }
-        ApplyFeatureProcessor.super.process(context);
+//        ApplyFeatureProcessor.super.process(context);
+        context.addProcessedAction("getter");
     }
 }

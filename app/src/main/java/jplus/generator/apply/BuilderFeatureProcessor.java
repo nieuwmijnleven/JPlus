@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class BuilderFeatureProcessor implements ApplyFeatureProcessor {
     @Override
     public void process(ApplyFeatureProcessingContext context) {
-        if (context.hasProcessed()) return;
+        if (context.hasProcessed("builder")) return;
 
         if (context.getClassSymbolTable().contains("Builder", TypeInfo.Type.Class)) {
             return;
@@ -53,8 +53,8 @@ public class BuilderFeatureProcessor implements ApplyFeatureProcessor {
 
         builder += fieldDeclarations.stream().collect(Collectors.joining("\n", "\n", "\n"));
         builder += methodDeclarations.stream().collect(Collectors.joining("\n\n", "\n", "\n"));
-        builder += "\n" + indentation + "public User build() {\n";
-        builder += doubleIndentation + "return new User(" + nonStaticFieldList.stream().collect(Collectors.joining(", ")) + ");\n";
+        builder += "\n" + indentation + "public " + context.getTargetClass() + " build() {\n";
+        builder += doubleIndentation + "return new " + context.getTargetClass() + "(" + nonStaticFieldList.stream().collect(Collectors.joining(", ")) + ");\n";
         builder += indentation + "}\n";
         builder += "}\n";
 
@@ -63,6 +63,7 @@ public class BuilderFeatureProcessor implements ApplyFeatureProcessor {
         builder += "}\n";
 
         context.appendMethodPartText(builder);
-        ApplyFeatureProcessor.super.process(context);
+//        ApplyFeatureProcessor.super.process(context);
+        context.addProcessedAction("builder");
     }
 }

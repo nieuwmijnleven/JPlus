@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = 'JPlus'
-include('app')
+include('app', 'intellij-plugin')

@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class ToStringFeatureProcessor implements ApplyFeatureProcessor {
     @Override
     public void process(ApplyFeatureProcessingContext context) {
-        if (context.hasProcessed()) return;
+        if (context.hasProcessed("tostring")) return;
 
         String methodSymbol = "^toString$_";
         if (context.getClassSymbolTable().contains(methodSymbol, TypeInfo.Type.Method)) {
@@ -28,6 +28,7 @@ public class ToStringFeatureProcessor implements ApplyFeatureProcessor {
         toString += "\"}\";\n";
         toString += "}\n";
         context.appendMethodPartText(toString);
-        ApplyFeatureProcessor.super.process(context);
+//        ApplyFeatureProcessor.super.process(context);
+        context.addProcessedAction("tostring");
     }
 }

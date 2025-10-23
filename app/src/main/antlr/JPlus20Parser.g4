@@ -333,7 +333,7 @@ applyStatement
     ;
 
 applyBlock
-    : 'apply' '{' applyBlockEntry (',' applyBlockEntry)* '}'
+    : 'apply' '{' applyBlockEntry (applyBlockEntry)* '}'
     ;
 
 applyFeatureList

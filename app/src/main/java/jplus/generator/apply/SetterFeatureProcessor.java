@@ -7,11 +7,12 @@ import jplus.base.TypeInfo;
 import jplus.util.Utils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SetterFeatureProcessor implements ApplyFeatureProcessor {
     @Override
     public void process(ApplyFeatureProcessingContext context) {
-        if (context.hasProcessed()) return;
+        if (context.hasProcessed("setter")) return;
 
         SymbolTable classSymbolTable = context.getClassSymbolTable();
         for (String fieldName : context.getFieldList()) {
@@ -37,6 +38,7 @@ public class SetterFeatureProcessor implements ApplyFeatureProcessor {
 
             context.appendMethodPartText(methodPartText.toString());
         }
-        ApplyFeatureProcessor.super.process(context);
+//        ApplyFeatureProcessor.super.process(context);
+        context.addProcessedAction("setter");
     }
 }

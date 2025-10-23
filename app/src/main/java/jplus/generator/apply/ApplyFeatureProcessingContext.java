@@ -2,6 +2,7 @@ package jplus.generator.apply;
 
 import jplus.base.SymbolTable;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,74 +13,94 @@ public class ApplyFeatureProcessingContext {
     private final SymbolTable classSymbolTable;
     private final StringBuilder constructorPartText;
     private final StringBuilder methodPartText;
+    private final Set<String> processedActionList;
     private final List<String> fieldList;
     private final List<String> primitiveFields;
     private final List<String> referenceFields;
     private final String targetClass;
+    private final String qualifiedName;
     private final String indentation;
-    private final Set<String> processed = new HashSet<>();
 
     public ApplyFeatureProcessingContext(ApplyFeature feature,
                                          SymbolTable classSymbolTable,
                                          StringBuilder constructorPartText,
-                                         StringBuilder methodPartText,
+                                         StringBuilder methodPartText, Set<String> processedActionList,
                                          List<String> fieldList,
                                          List<String> primitiveFields,
                                          List<String> referenceFields,
-                                         String targetClass,
+                                         String targetClass, String qualifiedName,
                                          String indentation) {
         this.feature = feature;
         this.classSymbolTable = classSymbolTable;
         this.constructorPartText = constructorPartText;
         this.methodPartText = methodPartText;
+        this.processedActionList = processedActionList;
         this.fieldList = fieldList;
         this.primitiveFields = primitiveFields;
         this.referenceFields = referenceFields;
         this.targetClass = targetClass;
+        this.qualifiedName = qualifiedName;
         this.indentation = indentation;
     }
 
-    public void addProcessedAction(String action) {
-        processed.add(action);
+    public void addProcessedAction(String detailedAction) {
+        processedActionList.add(detailedAction);
     }
 
-    public void resetProcessedAction() {
-        processed.remove(feature.getAction().toLowerCase());
+    public void removeProcessedAction(String detailedAction) {
+        processedActionList.remove(detailedAction);
+    }
+
+    public boolean hasProcessed(String detailedAction) {
+        return processedActionList.contains(detailedAction);
     }
 
     public boolean hasProcessed() {
-        return processed.contains(feature.getAction().toLowerCase());
-    }
-
-    public boolean hasProcessed(String action) {
-        return processed.contains(action);
+        return processedActionList.contains(feature.getAction().toLowerCase());
     }
 
     public void setFeature(ApplyFeature feature) {
         this.feature = feature;
     }
 
-    // Getter 메서드들...
     public ApplyFeature getFeature() { return feature; }
     public SymbolTable getClassSymbolTable() { return classSymbolTable; }
-    public void appendConstructorPartText(String text) { constructorPartText.append(text); }
+    public void appendConstructorPartText(String text) { constructorPartText.append(text);
+    }
     public void appendMethodPartText(String text) { methodPartText.append(text); }
+    public String getConstructorPartText() {
+        return constructorPartText.toString();
+    }
+    public String getMethodPartText() {
+        return methodPartText.toString();
+    }
+
+    public Set<String> getProcessedActionList() {
+        return Collections.unmodifiableSet(processedActionList);
+    }
+
     public List<String> getFieldList() { return fieldList; }
     public List<String> getPrimitiveFields() { return primitiveFields; }
     public List<String> getReferenceFields() { return referenceFields; }
     public String getTargetClass() { return targetClass; }
+
+    public String getQualifiedName() {
+        return qualifiedName;
+    }
+
     public String getIndentation() { return indentation; }
 
-    // Builder 클래스
     public static class Builder {
         private ApplyFeature feature;
         private SymbolTable classSymbolTable;
         private StringBuilder constructorPartText;
         private StringBuilder methodPartText;
+        private Set<String> processedActionList;
         private List<String> fieldList;
         private List<String> primitiveFields;
         private List<String> referenceFields;
         private String targetClass;
+        private String qualifiedName;
         private String indentation;
 
         public Builder feature(ApplyFeature feature) {
@@ -99,6 +120,11 @@ public class ApplyFeatureProcessingContext {
 
         public Builder methodPartText(StringBuilder methodPartText) {
             this.methodPartText = methodPartText;
+            return this;
+        }
+
+        public Builder processedActionList(Set<String> processedActionList) {
+            this.processedActionList = processedActionList;
             return this;
         }
 
@@ -122,6 +148,11 @@ public class ApplyFeatureProcessingContext {
             return this;
         }
 
+        public Builder qualifiedName(String qualifiedName) {
+            this.qualifiedName = qualifiedName;
+            return this;
+        }
+
         public Builder indentation(String indentation) {
             this.indentation = indentation;
             return this;
@@ -133,10 +164,12 @@ public class ApplyFeatureProcessingContext {
                 classSymbolTable,
                 constructorPartText,
                 methodPartText,
+                processedActionList,
                 fieldList,
                 primitiveFields,
                 referenceFields,
                 targetClass,
+                qualifiedName,
                 indentation
             );
         }
