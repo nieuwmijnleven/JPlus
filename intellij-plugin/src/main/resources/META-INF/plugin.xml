@@ -1,0 +1,61 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>jplus.plugin</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
+    <name>JPlus</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor url="https://github.com/nieuwmijnleven/JPlus">JPlus</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
+    <description><![CDATA[
+        JPlus is a Java superset language running on the JVM.
+  It preserves Java syntax while adding modern features like strict null safety, type inference, and functional programming
+  to significantly boost developer productivity.
+  This IntelliJ plugin provides full language support for editing, compiling, and running JPlus code within the IDE.
+  JPlus allows gradual adoption in existing Java projects, helping you write safer and more concise code.
+    ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.lang</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <fileTypeFactory implementation="jplus.plugin.intellij.JPlusFileTypeFactory"/>
+        <lang.syntaxHighlighterFactory language="JPlus" implementationClass="jplus.plugin.intellij.JPlusSyntaxHighlighterFactory"/>
+<!--        <lang.commenter language="JPlus" implementationClass="jplus.plugin.intellij.JPlusCommenter" />-->
+<!--        <indexPatternBuilder implementation="jplus.plugin.intellij.psi.JPlusIndexPatternBuilder"/>-->
+<!--        <lang.braceMatcher language="JPlus" implementationClass="jplus.plugin.intellij.editor.JPlusBraceMatcher"/>-->
+<!--        <colorSettingsPage implementation="jplus.plugin.intellij.configdialogs.JPlusColorsPage"/>-->
+<!--        <additionalTextAttributes scheme="Default" file="colorSchemes/JPlusDefault.xml"/>-->
+<!--        <additionalTextAttributes scheme="Darcula" file="colorSchemes/JPlusDarcula.xml"/>-->
+        <lang.parserDefinition language="JPlus" implementationClass="jplus.plugin.intellij.JPlusParserDefinition"/>
+<!--        <lang.ast.factory language="JPlus" implementationClass="jplus.plugin.intellij.JPlusASTFactory"/>-->
+<!--        <lang.psiStructureViewFactory language="JPlus"-->
+<!--                                      implementationClass="jplus.plugin.intellij.structview.JPlusStructureViewFactory"/>-->
+<!--        <lang.foldingBuilder language="JPlus" implementationClass="jplus.plugin.intellij.folding.JPlusFoldingBuilder" />-->
+<!--        <iconProvider implementation="jplus.plugin.intellij.JPlusIconProvider"/>-->
+
+<!--        <externalAnnotator language="JPlus" implementationClass="jplus.plugin.intellij.JPlusExternalAnnotator"/>-->
+<!--        <lang.findUsagesProvider language="JPlus"-->
+<!--                                 implementationClass="jplus.plugin.intellij.JPlusFindUsagesProvider"/>-->
+
+<!--        <defaultLiveTemplates file="/liveTemplates/lexer/user.xml"/>-->
+<!--        <liveTemplateContext contextId="OTHER" implementation="jplus.plugin.intellij.templates.ANTLRGenericContext"/>-->
+<!--        <liveTemplateContext contextId="OTHER" implementation="jplus.plugin.intellij.templates.OutsideRuleContext"/>-->
+<!--        <projectConfigurable groupId="language"-->
+<!--                             id="jplus.plugin.intellij.configdialogs.JPlusProjectSettings"-->
+<!--                             displayName="JPlus default project settings"-->
+<!--                             instance="jplus.plugin.intellij.configdialogs.JPlusProjectSettings"/>-->
+<!--        <projectService serviceImplementation="jplus.plugin.intellij.configdialogs.JPlusGrammarPropertiesComponent"/>-->
+<!--        <lang.refactoringSupport language="JPlus" implementationClass="jplus.plugin.intellij.refactor.JPlusRefactoringSupport"/>-->
+<!--        <completion.contributor language="JPlus"-->
+<!--                                implementationClass="jplus.plugin.intellij.completion.JPlusCompletionContributor"/>-->
+    </extensions>
+</idea-plugin>
