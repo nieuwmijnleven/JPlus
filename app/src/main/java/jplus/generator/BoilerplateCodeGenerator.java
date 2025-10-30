@@ -26,18 +26,25 @@ import jplus.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
 
     private final SymbolTable symbolTable;
+    private final FragmentedText fragmentedText;
     private final List<ApplyStatement> applyStatementList = new ArrayList<>();
-    private final CodeGeneratorContext codeGeneratorCtx = CodeGeneratorContext.getInstance();
     private final Map<String, ApplyFeatureProcessor> strategyMap = new HashMap<>();
+    private final Map<String, Set<String>> processedClassActionMap = new HashMap<>();
+    private final Map<String, ApplyFeatureProcessingContext> processedClassActionContextMap = new HashMap<>();
 
-    public BoilerplateCodeGenerator(SymbolTable symbolTable) {
+    public BoilerplateCodeGenerator(SymbolTable symbolTable, FragmentedText fragmentedText) {
         this.symbolTable = symbolTable;
+        this.fragmentedText = fragmentedText;
         registerStrategies();
     }
 
@@ -106,7 +113,6 @@ public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
                 .findFirst()
                 .ifPresent(stmt -> stmt.setQualifiedName(topLevelClass));
 
-        FragmentedText fragmentedText = codeGeneratorCtx.getFragmentedText();
         int baseIndent = 4;
         for (ApplyStatement applyStatement : applyStatementList) {
             String qualifiedName = applyStatement.getQualifiedName();
@@ -150,35 +156,34 @@ public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
             int endIndex = symbolInfo.getRange().inclusiveEndIndex() + 1;
             TextChangeRange constructorRange = new TextChangeRange(endLine, endIndex, endLine, endIndex);
 
-            StringBuilder constructorPartText = new StringBuilder();
-            StringBuilder methodPartText = new StringBuilder();
+            ApplyFeatureProcessingContext context = processedClassActionContextMap.computeIfAbsent(qualifiedName, k -> {
+                return ApplyFeatureProcessingContext.builder()
+                        .targetClass(targetClass)
+                        .qualifiedName(qualifiedName)
+                        .classSymbolTable(classSymbolTable)
+                        .fieldList(fieldList)
+                        .primitiveFields(primitiveTypeFieldList)
+                        .referenceFields(referenceTypeFieldList)
+                        .processedActionList(processedClassActionMap.computeIfAbsent(qualifiedName, key -> new HashSet<>()))
+                        .indentation(indentation)
+                        .constructorPartText(new StringBuilder())
+                        .methodPartText(new StringBuilder())
+                        .build();
+            });
 
-            ApplyFeatureProcessingContext.Builder builder = ApplyFeatureProcessingContext.builder()
-                    .targetClass(targetClass)
-                    .classSymbolTable(classSymbolTable)
-                    .fieldList(fieldList)
-                    .primitiveFields(primitiveTypeFieldList)
-                    .referenceFields(referenceTypeFieldList)
-                    .indentation(indentation)
-                    .constructorPartText(constructorPartText)
-                    .methodPartText(methodPartText);
-
-            ApplyFeatureProcessingContext context = builder.build();
             for (ApplyFeature feature : applyStatement.getFeatureList()) {
                 String action = feature.getAction();
-                List<String> arguments = feature.getArgumentList();
+                ApplyFeatureProcessor processor = strategyMap.get(action.toLowerCase());
+                if (processor == null) throw new IllegalArgumentException("Unsupported action: " + action + " in feature " + feature + " at class " + qualifiedName);
 
                 context.setFeature(feature);
-
-                ApplyFeatureProcessor processor = strategyMap.get(action.toLowerCase());
-                if (processor == null) throw new IllegalArgumentException(action + " is not supported");
                 processor.process(context);
             }
 
-            String replacedText = Utils.indentLines(methodPartText.toString(), indent) + Utils.indentLines("\n}", indent - baseIndent);
+            String replacedText = Utils.indentLines(context.getMethodPartText(), indent) + Utils.indentLines("\n}", indent - baseIndent);
             fragmentedText.update(newRange, replacedText);
 
-            replacedText = Utils.indentLines(constructorPartText.toString(), constructorIndent) + "\n";
+            replacedText = Utils.indentLines(context.getConstructorPartText(), constructorIndent) + "\n";
             fragmentedText.update(constructorRange, replacedText);
         }
 

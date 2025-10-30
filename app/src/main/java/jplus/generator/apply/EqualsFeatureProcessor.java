@@ -9,8 +9,8 @@ import java.util.List;
 public class EqualsFeatureProcessor implements ApplyFeatureProcessor {
     @Override
     public void process(ApplyFeatureProcessingContext context) {
-        if (context.hasProcessed()) return;
-        
+        if (context.hasProcessed("equals")) return;
+
         String methodSymbol = "^equals$_Object";
         if (context.getClassSymbolTable().contains(methodSymbol, TypeInfo.Type.Method)) {
             return;
@@ -51,6 +51,7 @@ public class EqualsFeatureProcessor implements ApplyFeatureProcessor {
             context.appendMethodPartText(generatedText.toString());
         }
 
-        ApplyFeatureProcessor.super.process(context);
+//        ApplyFeatureProcessor.super.process(context);
+        context.addProcessedAction("equals");
     }
 }

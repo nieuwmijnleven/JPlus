@@ -42,6 +42,22 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
 
 ---
 
+## 🚀 IntelliJ Plugin Launch – Coming Soon!
+
+We’re thrilled to announce that the **JPlus IntelliJ Plugin** is about to be released! 🎉
+
+This plugin will allow you to:
+
+- Write JPlus code directly in IntelliJ IDEA
+- Enjoy full IDE support including syntax highlighting, code completion, and error checking
+- Seamlessly integrate with your existing Java projects
+
+🎥 **Watch the demo video:** [JPlus IntelliJ Plugin Demo](https://youtu.be/0z_aIyBpJso)
+
+Stay tuned – the plugin will be publicly available very soon! Your feedback and early testing will be invaluable to help us polish it before the official launch.
+
+---
+
 ## 🚀 New Feature: Apply Syntax for Boilerplate Elimination
 
 JPlus introduces a powerful new **`apply` syntax** to replace common boilerplate patterns previously handled by Lombok annotations. This declarative syntax helps you reduce repetitive code like getters, setters, constructors, equals/hashCode, and builders — all in a clean, compact form.

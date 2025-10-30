@@ -18,12 +18,12 @@ public class JPlusFileType extends LanguageFileType {
 
     @Override
     public @NonNls @NotNull String getName() {
-        return "JPlus file";
+        return "JPlus";
     }
 
     @Override
     public @NlsContexts.Label @NotNull String getDescription() {
-        return "JPlus file";
+        return "JPlus";
     }
 
     @Override

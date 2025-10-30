@@ -6,7 +6,6 @@ public class EqualityFeatureProcessor implements ApplyFeatureProcessor {
         ApplyFeatureProcessor processor = new EqualsFeatureProcessor();
         processor.process(context);
 
-        context.resetProcessedAction();
         processor = new HashCodeFeatureProcessor();
         processor.process(context);
     }

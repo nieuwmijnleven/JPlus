@@ -4,9 +4,7 @@ import jplus.base.Modifier;
 import jplus.base.SymbolInfo;
 import jplus.base.SymbolTable;
 import jplus.base.TypeInfo;
-import jplus.generator.CodeGeneratorContext;
 import jplus.generator.TextChangeRange;
-import jplus.util.FragmentedText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +77,6 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
         TextChangeRange range = new TextChangeRange(endLine, endIndex, endLine, endIndex);
         String indentation = context.getIndentation();
 
-        FragmentedText fragmentedText = CodeGeneratorContext.getInstance().getFragmentedText();
         String constructor = "\n\n" + "public " + className + "(";
 
         List<String> parameters = new ArrayList<>();
@@ -137,7 +134,6 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
         TextChangeRange range = new TextChangeRange(endLine, endIndex, endLine, endIndex);
         String indentation = context.getIndentation();
 
-        FragmentedText fragmentedText = CodeGeneratorContext.getInstance().getFragmentedText();
         String className = context.getTargetClass();
         String constructor = "\n\n" + "public " + className + "(";
 

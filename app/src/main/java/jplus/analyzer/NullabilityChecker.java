@@ -5,8 +5,12 @@ import jplus.base.JPlus20ParserBaseVisitor;
 import jplus.base.SymbolInfo;
 import jplus.base.SymbolTable;
 import jplus.base.TypeInfo;
+import jplus.util.Utils;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
@@ -14,20 +18,47 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
     private boolean hasPassed = true;
 
-    private String getTokenString(ParserRuleContext ctx) {
-        return ctx.start.getTokenSource().getInputStream().getText(Interval.of(ctx.start.getStartIndex(), ctx.stop.getStopIndex()));
+    // 새로 추가: 문제 정보를 담는 클래스
+    public static class NullabilityIssue {
+        private final int line;
+        private final int column;
+        private final int offset;
+        private final String message;
+
+        public NullabilityIssue(int line, int column, int offset, String message) {
+            this.line = line;
+            this.column = column;
+            this.offset = offset;
+            this.message = message;
+        }
+
+        public int getLine() { return line; }
+        public int getColumn() { return column; }
+        public int getOffset() { return offset; }
+        public String getMessage() { return message; }
+
+        @Override
+        public String toString() {
+            return String.format("Error: (line:%d, column:%d) %s", line, column, message);
+        }
+    }
+
+    private final List<NullabilityIssue> issues = new ArrayList<>();
+
+    public List<NullabilityIssue> getIssues() {
+        return issues;
     }
 
     @Override
     public Void visitLocalVariableDeclaration(JPlus20Parser.LocalVariableDeclarationContext ctx) {
-        String typeName = getTokenString(ctx.localVariableType());
+        String typeName = Utils.getTokenString(ctx.localVariableType());
 
         var variableDeclaratorContext = ctx.variableDeclaratorList().variableDeclarator().get(0);
-        String variableName = getTokenString(variableDeclaratorContext.variableDeclaratorId());
+        String variableName = Utils.getTokenString(variableDeclaratorContext.variableDeclaratorId());
 
         String expression = "null";
         if (variableDeclaratorContext.variableInitializer() != null) {
-            expression = getTokenString(variableDeclaratorContext.variableInitializer());
+            expression = Utils.getTokenString(variableDeclaratorContext.variableInitializer());
         }
 
         boolean nullable = typeName.endsWith("?");
@@ -37,7 +68,9 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
         if (!typeInfo.isNullable() && "null".equals(expression)) {
             int line = ctx.getStart().getLine();
             int column = ctx.getStart().getCharPositionInLine();
-            System.out.printf("Error: (line:%d, column:%d) %s is a non-nullable variable. But null value is assigned to it.\n", line, column, variableName);
+            int offset = ctx.getStart().getStartIndex();
+            String msg = variableName + " is a non-nullable variable. But null value is assigned to it.";
+            issues.add(new NullabilityIssue(line, column, offset, msg));
             hasPassed = false;
         }
 
@@ -47,42 +80,40 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
     @Override
     public Void visitMethodInvocation(JPlus20Parser.MethodInvocationContext ctx) {
         if (ctx.typeName() != null) {
-            String instanceName = getTokenString(ctx.typeName());
-            String methodName = getTokenString(ctx.identifier());
+            String instanceName = Utils.getTokenString(ctx.typeName());
+            String methodName = Utils.getTokenString(ctx.identifier());
             boolean nullsafe = ctx.NULLSAFE() != null;
 
             SymbolInfo symbolInfo = symbolTable.resolve(instanceName);
             if (symbolInfo != null && symbolInfo.getTypeInfo().isNullable() && !nullsafe) {
                 int line = ctx.getStart().getLine();
                 int column = ctx.getStart().getCharPositionInLine();
-                System.out.printf("Error: (line:%d, column:%d) %s is a nullable variable. But it direct accesses to %s(). You must consider to use null-safe operator(?.)\n", line, column, instanceName, methodName);
+                int offset = ctx.getStart().getStartIndex();
+                String msg = instanceName + " is a nullable variable. But it directly accesses " + methodName + "(). Consider using null-safe operator(?.).";
+                issues.add(new NullabilityIssue(line, column, offset, msg));
                 hasPassed = false;
             }
-        } else {
-            ;
         }
-
         return super.visitMethodInvocation(ctx);
     }
 
     @Override
     public Void visitPrimaryNoNewArray(JPlus20Parser.PrimaryNoNewArrayContext ctx) {
         if (ctx.typeName() != null) {
-            String instanceName = getTokenString(ctx.typeName());
-            String methodName = getTokenString(ctx.identifier());
+            String instanceName = Utils.getTokenString(ctx.typeName());
+            String methodName = Utils.getTokenString(ctx.identifier());
             boolean nullsafe = ctx.NULLSAFE() != null;
 
             SymbolInfo symbolInfo = symbolTable.resolve(instanceName);
             if (symbolInfo != null && symbolInfo.getTypeInfo().isNullable() && !nullsafe) {
                 int line = ctx.getStart().getLine();
                 int column = ctx.getStart().getCharPositionInLine();
-                System.out.printf("Error: (line:%d, column:%d) %s is a nullable variable. But it direct accesses to %s(). You must consider to use null-safe operator(?.)\n", line, column, instanceName, methodName);
+                int offset = ctx.getStart().getStartIndex();
+                String msg = instanceName + " is a nullable variable. But it directly accesses " + methodName + "(). Consider using null-safe operator(?.).";
+                issues.add(new NullabilityIssue(line, column, offset, msg));
                 hasPassed = false;
             }
-        } else {
-            ;
         }
-
         return super.visitPrimaryNoNewArray(ctx);
     }
 

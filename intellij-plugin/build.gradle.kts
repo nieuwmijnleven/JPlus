@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "jplus.plugin.intellij"
-version = "0.1-mvp"
+version = "0.1-mvp-alpha"
 
 repositories {
     mavenCentral()
@@ -23,7 +23,7 @@ dependencies {
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         // Add necessary plugin dependencies for compilation here, example:
-        // bundledPlugin("com.intellij.java")
+         bundledPlugin("com.intellij.java")
     }
 
     implementation(project(":app"))
@@ -31,6 +31,7 @@ dependencies {
         exclude(group="com.ibm.icu", module="icu4j")
     }
     implementation("org.antlr:antlr4-intellij-adaptor:0.1")
+    implementation("org.bitbucket.cowwoc:diff-match-patch:1.2")
 }
 
 intellijPlatform {
@@ -67,7 +68,8 @@ tasks.named("generateGrammarSource", AntlrTask::class.java).configure {
 sourceSets {
     main {
         java {
-            srcDirs.add(File("src/main/antlr/generated-src"))
+            //srcDir("src/main/antlr/generated-src")
+            srcDirs("src/main/antlr/generated-src")
         }
     }
 }
