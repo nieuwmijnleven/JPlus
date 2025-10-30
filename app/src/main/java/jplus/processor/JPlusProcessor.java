@@ -39,25 +39,20 @@ public class JPlusProcessor {
     }
 
     public void process() throws Exception {
-//        CodeGeneratorContext context = CodeGeneratorContext.getInstance();
-//        context.setOriginal(text);
-//        TextChangeRange range = Utils.computeTextChangeRange(text, 0, text.length()-1);
-//        context.setFragmentedText(new FragmentedText(range, text));
-
         CharStream input = CharStreams.fromString(originalText);
         JPlus20Lexer lexer = new JPlus20Lexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         parser = new JPlus20Parser(tokens);
-
         parseTree = parser.start_();
+//        System.out.println(parseTree.toStringTree(parser));
     }
 
     public List<NullabilityChecker.NullabilityIssue> checkNullability() {
-        if (parseTree == null) {
-            throw new IllegalStateException("Call process() first.");
+        if (parseTree == null || !symbolsAnalyzed) {
+            throw new IllegalStateException("Call process() and analyzeSymbols() first.");
         }
 
-        NullabilityChecker nullabilityChecker = new NullabilityChecker();
+        NullabilityChecker nullabilityChecker = new NullabilityChecker(symbolTable);
         nullabilityChecker.visit(parseTree);
         nullabilityChecked = true;
         return nullabilityChecker.getIssues();
@@ -90,19 +85,16 @@ public class JPlusProcessor {
     public String compile() {
         try {
             process();
-            checkNullability();
             analyzeSymbols();
+            checkNullability();
             return generateJavaCode();
         } catch (Exception e) {
             e.printStackTrace(System.err);
-//            System.err.println(e);
-//            throw new RuntimeException(e);
         }
 
         return null;
     }
 
-    // Getter
     public JPlusParserRuleContext getParseTree() {
         return parseTree;
     }

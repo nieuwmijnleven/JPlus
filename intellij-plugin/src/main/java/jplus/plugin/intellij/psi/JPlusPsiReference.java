@@ -49,7 +49,7 @@ public class JPlusPsiReference extends PsiReferenceBase<PsiElement> {
             var refElement = (PsiJavaCodeReferenceElement) resolved;
             String qualfiedName = refElement.getQualifiedName();
             String packageName = javaFile.getPackageName();
-            if (!qualfiedName.startsWith(packageName)) {
+            if (packageName.length() > 0 && !qualfiedName.startsWith(packageName)) {
                 PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(qualfiedName, GlobalSearchScope.allScope(project));
                 if (psiClass != null) return psiClass;
             }

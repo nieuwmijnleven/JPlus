@@ -30,6 +30,7 @@ public class JPlusFileService {
         try {
             JPlusProcessor processor = new JPlusProcessor(jplusCode);
             processor.process();
+            processor.analyzeSymbols();
 
             var issues = processor.checkNullability();
             if (!issues.isEmpty()) {
@@ -37,7 +38,6 @@ public class JPlusFileService {
                 return;
             }
 
-            processor.analyzeSymbols();
             String javaCode = processor.generateJavaCode();
             System.out.println("javaCode = " + javaCode);
 

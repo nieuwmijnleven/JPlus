@@ -7,8 +7,6 @@ import org.antlr.v4.runtime.misc.Interval;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.nio.file.Files.lines;
-
 public class Utils {
 
     private Utils() {}
@@ -63,7 +61,6 @@ public class Utils {
     }
 
     public static int getIndexFromLineColumn(String text, TextChangeRange range, int targetLine, int targetColumn) {
-        // 1. target이 주어진 range 범위 안에 있는지 확인
         if (targetLine < range.startLine() || targetLine > range.endLine()) {
             return -1;
         }
@@ -76,12 +73,10 @@ public class Utils {
             return -1;
         }
 
-        // 2. 현재 위치 초기화 (range 시작점 기준)
         int currentLine = range.startLine();
         int currentColumn = range.startIndex();
         int index = 0;
 
-        // 3. 텍스트 순회하면서 target 좌표 찾기
         while (index < text.length()) {
             if (currentLine == targetLine && currentColumn == targetColumn) {
                 return index;
@@ -98,7 +93,6 @@ public class Utils {
             index++;
         }
 
-        // 4. 끝까지 도달했지만 좌표 못 찾음
         return -1;
     }
 
@@ -182,7 +176,6 @@ public class Utils {
             currentIndex++;
         }
 
-        // startIndex == endIndex일 경우 루프 안에서 끝날 수 있으므로 마지막 문자 처리
         if (endLine == -1 && currentIndex == endIndex) {
             endLine = currentLine;
             endColumn = currentColumn;
@@ -194,15 +187,6 @@ public class Utils {
 
         return new TextChangeRange(startLine, startColumn, endLine, endColumn);
     }
-
-
-//    public static TextChangeRange getTextChangeRange(ParserRuleContext ctx) {
-//        int startLine = ctx.start.getLine();
-//        int startIndex = ctx.start.getCharPositionInLine();
-//        int endLine = ctx.stop.getLine();
-//        int endIndex = ctx.stop.getCharPositionInLine() + ctx.stop.getText().length() - 1;
-//        return new TextChangeRange(startLine, startIndex, endLine, endIndex);
-//    }
 
     public static TextChangeRange getTextChangeRange(String original, ParserRuleContext ctx) {
         int startIndex = ctx.start.getStartIndex();

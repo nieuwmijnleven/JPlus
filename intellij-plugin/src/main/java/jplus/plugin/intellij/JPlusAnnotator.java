@@ -22,6 +22,7 @@ public class JPlusAnnotator implements Annotator {
         JPlusProcessor processor = new JPlusProcessor(jplusFile.getText());
         try {
             processor.process();
+            processor.analyzeSymbols();
             var issues = processor.checkNullability();
             if (!issues.isEmpty()) {
                 System.err.println("nullability warning");

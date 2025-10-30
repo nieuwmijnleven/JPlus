@@ -8,7 +8,6 @@ import jplus.base.SymbolTable;
 import jplus.base.TypeInfo;
 import jplus.generator.TextChangeRange;
 import jplus.util.Utils;
-import org.antlr.v4.runtime.misc.Interval;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,6 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
 
     private final SymbolTable topLevelSymbolTable = new SymbolTable(null);
     private SymbolTable currentSymbolTable = topLevelSymbolTable;
-
     private String originalText;
 
     public SymbolTable getTopLevelSymbolTable() {
@@ -27,10 +25,6 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
 
     @Override
     public Void visitStart_(JPlus20Parser.Start_Context ctx) {
-//        System.out.println("[visitStart_] startIndex = " + ctx.start.getStartIndex());
-//        System.out.println("[visitStart_] stopIndex = " + ctx.stop.getStopIndex());
-//        System.out.println("length = " + ctx.start.getInputStream().toString().length());
-//        System.out.println("text = " + ctx.start.getInputStream().toString());
         this.originalText = ctx.start.getInputStream().toString();
         return super.visitStart_(ctx);
     }
@@ -42,7 +36,8 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
             TypeInfo typeInfo = new TypeInfo(className, false, TypeInfo.Type.Class);
             TextChangeRange range = Utils.getTextChangeRange(this.originalText, ctx);
             String rangeText = Utils.getTokenString(ctx);
-            SymbolInfo symbolInfo = new SymbolInfo(className, typeInfo, range, rangeText);
+
+            SymbolInfo symbolInfo = SymbolInfo.builder().symbol(className).typeInfo(typeInfo).range(range).originalText(rangeText).build();
             currentSymbolTable.declare("^TopLevelClass$", symbolInfo); //TopLevelClass
         } else if (ctx.interfaceDeclaration() != null) {
 
@@ -133,7 +128,9 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
         List<Modifier> modifierList = new ArrayList<>();
         if (ctx.fieldModifier() != null) {
             for (var fieldModifierContext : ctx.fieldModifier()) {
-                modifierList.add(Modifier.valueOf(Utils.getTokenString(fieldModifierContext).toUpperCase()));
+                if (fieldModifierContext.annotation() == null) {
+                    modifierList.add(Modifier.valueOf(Utils.getTokenString(fieldModifierContext).toUpperCase()));
+                }
             }
         }
 
@@ -165,32 +162,6 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
         return super.visitFieldDeclaration(ctx);
     }
 
-//    @Override
-//    public Void visitMethodDeclaration(JPlus20Parser.MethodDeclarationContext ctx) {
-//        String typeName = Utils.getTokenString(ctx.methodHeader().methodDeclarator().identifier());
-//        TypeInfo typeInfo = new TypeInfo(typeName, false, TypeInfo.Type.Method);
-//        TextChangeRange range = Utils.getTextChangeRange(this.originalText, ctx);
-//        String rangeText = Utils.getTokenString(ctx);
-//
-//        List<Modifier> modifierList = new ArrayList<>();
-//        if (ctx.methodModifier() != null) {
-//            for (var methodModifierContext : ctx.methodModifier()) {
-//                modifierList.add(Modifier.valueOf(Utils.getTokenString(methodModifierContext).toUpperCase()));
-//            }
-//        }
-//
-//        SymbolInfo symbolInfo = new SymbolInfo(typeName, typeInfo, range, rangeText);
-//        SymbolTable methodSymbolTable = currentSymbolTable.getEnclosingSymbolTable(typeName);
-//        symbolInfo.setSymbolTable(methodSymbolTable);
-//        currentSymbolTable.declare(typeName, symbolInfo);
-//
-//        currentSymbolTable = methodSymbolTable;
-//        super.visitMethodDeclaration(ctx);
-//        currentSymbolTable = currentSymbolTable.getParent();
-//        return null;
-//    }
-
-
     @Override
     public Void visitMethodDeclaration(JPlus20Parser.MethodDeclarationContext ctx) {
         SymbolTable methodSymbolTable = new SymbolTable(currentSymbolTable);
@@ -208,7 +179,7 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
 
             String typeName = Utils.getTokenString(formalParameterContext.unannType());
             String variableName = Utils.getTokenString(formalParameterContext.variableDeclaratorId());
-            boolean nullable = formalParameterContext.unannType().QUESTION() == null ? true : false;
+            boolean nullable = formalParameterContext.unannType().QUESTION() != null;
             TypeInfo.Type type = formalParameterContext.unannType().unannReferenceType() != null ? TypeInfo.Type.Reference : TypeInfo.Type.Primitive;
             TypeInfo typeInfo = new TypeInfo(typeName, nullable, type);
             TextChangeRange range = Utils.getTextChangeRange(this.originalText, formalParameterContext);
@@ -221,7 +192,9 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
         List<Modifier> modifierList = new ArrayList<>();
         if (ctx.methodModifier() != null) {
             for (var methodModifierContext : ctx.methodModifier()) {
-                modifierList.add(Modifier.valueOf(Utils.getTokenString(methodModifierContext).toUpperCase()));
+                if (methodModifierContext.annotation() == null) {
+                    modifierList.add(Modifier.valueOf(Utils.getTokenString(methodModifierContext).toUpperCase()));
+                }
             }
         }
 
@@ -237,6 +210,71 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
         currentSymbolTable = currentSymbolTable.addEnclosingSymbolTable(symbolName, methodSymbolTable);
         super.visitMethodDeclaration(ctx);
         currentSymbolTable = currentSymbolTable.getParent();
+        return null;
+    }
+
+    @Override
+    public Void visitBlock(JPlus20Parser.BlockContext ctx) {
+        currentSymbolTable = currentSymbolTable.getEnclosingSymbolTable("^block$");
+        super.visitBlock(ctx);
+        currentSymbolTable = currentSymbolTable.getParent();
+        return null;
+    }
+
+    @Override
+    public Void visitLocalVariableDeclaration(JPlus20Parser.LocalVariableDeclarationContext ctx) {
+        List<Modifier> modifierList = new ArrayList<>();
+        for (JPlus20Parser.VariableModifierContext variableModifierContext : ctx.variableModifier()) {
+            modifierList.add(Modifier.valueOf(Utils.getTokenString(variableModifierContext).toUpperCase()));
+        }
+
+        TypeInfo.Builder typeInfoBuilder = TypeInfo.builder();
+        if (ctx.localVariableType().unannType() != null)  {
+            var unannType = ctx.localVariableType().unannType();
+            boolean nullable = unannType.QUESTION() != null;
+
+            if (unannType.unannReferenceType() != null) {
+                var unannReferenceType = unannType.unannReferenceType();
+                if (unannReferenceType.unannClassOrInterfaceType() != null) {
+                    typeInfoBuilder.name(Utils.getTokenString(unannReferenceType.unannClassOrInterfaceType()));
+                    typeInfoBuilder.isNullable(nullable);
+                    typeInfoBuilder.type(TypeInfo.Type.Class);
+                } else if (unannReferenceType.unannTypeVariable() != null) {
+                    typeInfoBuilder.name(Utils.getTokenString(unannReferenceType.unannTypeVariable()));
+                    typeInfoBuilder.isNullable(nullable);
+                    typeInfoBuilder.type(TypeInfo.Type.Class);
+                } else if (unannReferenceType.unannArrayType() != null) {
+                    typeInfoBuilder.name(Utils.getTokenString(unannReferenceType.unannArrayType()));
+                    typeInfoBuilder.isNullable(nullable);
+                    typeInfoBuilder.type(TypeInfo.Type.Array);
+                }
+            } else if (unannType.unannPrimitiveType() != null) {
+                typeInfoBuilder.name(Utils.getTokenString(unannType.unannPrimitiveType()));
+                typeInfoBuilder.isNullable(false);
+                typeInfoBuilder.type(TypeInfo.Type.Primitive);
+            }
+
+        } else if (ctx.localVariableType().VAR() != null) {
+            typeInfoBuilder.name(ctx.localVariableType().VAR().getText());
+            typeInfoBuilder.isNullable(true);
+            typeInfoBuilder.type(TypeInfo.Type.Reference);
+        }
+
+        SymbolInfo.Builder symbolInfoBuilder = SymbolInfo.builder();
+        var variableDeclarator = ctx.variableDeclaratorList().variableDeclarator();
+        for (JPlus20Parser.VariableDeclaratorContext variableDeclaratorContext : variableDeclarator) {
+            String symbol = Utils.getTokenString(variableDeclaratorContext.variableDeclaratorId());
+            symbolInfoBuilder.symbol(symbol);
+
+            symbolInfoBuilder.typeInfo(typeInfoBuilder.build());
+            symbolInfoBuilder.modifierList(modifierList);
+            symbolInfoBuilder.range(Utils.getTextChangeRange(this.originalText, ctx));
+            symbolInfoBuilder.originalText(Utils.getTokenString(ctx));
+            symbolInfoBuilder.symbolTable(currentSymbolTable);
+            SymbolInfo symbolInfo = symbolInfoBuilder.build();
+            currentSymbolTable.declare(symbolInfo.getSymbol(), symbolInfo);
+        }
+        //super.visitLocalVariableDeclaration(ctx);
         return null;
     }
 }

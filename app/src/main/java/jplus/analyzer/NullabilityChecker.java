@@ -2,23 +2,26 @@ package jplus.analyzer;
 
 import jplus.base.JPlus20Parser;
 import jplus.base.JPlus20ParserBaseVisitor;
+import jplus.base.Modifier;
 import jplus.base.SymbolInfo;
 import jplus.base.SymbolTable;
 import jplus.base.TypeInfo;
+import jplus.generator.TextChangeRange;
 import jplus.util.Utils;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
-    private final SymbolTable symbolTable = new SymbolTable(null);
-
+    private final SymbolTable topLevelSymbolTable;
+    private SymbolTable currentSymbolTable;
+    private String originalText;
     private boolean hasPassed = true;
 
-    // 새로 추가: 문제 정보를 담는 클래스
     public static class NullabilityIssue {
         private final int line;
         private final int column;
@@ -43,6 +46,11 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
         }
     }
 
+    public NullabilityChecker(SymbolTable symbolTable) {
+        this.topLevelSymbolTable = symbolTable;
+        this.currentSymbolTable = symbolTable;
+    }
+
     private final List<NullabilityIssue> issues = new ArrayList<>();
 
     public List<NullabilityIssue> getIssues() {
@@ -50,31 +58,146 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitLocalVariableDeclaration(JPlus20Parser.LocalVariableDeclarationContext ctx) {
-        String typeName = Utils.getTokenString(ctx.localVariableType());
+    public Void visitStart_(JPlus20Parser.Start_Context ctx) {
+        this.originalText = ctx.start.getInputStream().toString();
+        return super.visitStart_(ctx);
+    }
 
-        var variableDeclaratorContext = ctx.variableDeclaratorList().variableDeclarator().get(0);
-        String variableName = Utils.getTokenString(variableDeclaratorContext.variableDeclaratorId());
+    @Override
+    public Void visitClassDeclaration(JPlus20Parser.ClassDeclarationContext ctx) {
+        if (ctx.normalClassDeclaration() != null) {
+            String className = Utils.getTokenString(ctx.normalClassDeclaration().typeIdentifier());
+            currentSymbolTable = currentSymbolTable.getEnclosingSymbolTable(className);
+        } else if (ctx.enumDeclaration() != null) {
 
-        String expression = "null";
-        if (variableDeclaratorContext.variableInitializer() != null) {
-            expression = Utils.getTokenString(variableDeclaratorContext.variableInitializer());
+        } else if (ctx.recordDeclaration() != null) {
+
         }
 
-        boolean nullable = typeName.endsWith("?");
-        TypeInfo typeInfo = new TypeInfo(typeName, nullable, TypeInfo.Type.Unknown);
-        symbolTable.declare(variableName, new SymbolInfo(variableName, typeInfo, null, null));
+        super.visitClassDeclaration(ctx);
+        currentSymbolTable = currentSymbolTable.getParent();
+        return null;
+    }
 
-        if (!typeInfo.isNullable() && "null".equals(expression)) {
-            int line = ctx.getStart().getLine();
-            int column = ctx.getStart().getCharPositionInLine();
-            int offset = ctx.getStart().getStartIndex();
-            String msg = variableName + " is a non-nullable variable. But null value is assigned to it.";
-            issues.add(new NullabilityIssue(line, column, offset, msg));
-            hasPassed = false;
+    @Override
+    public Void visitConstructorDeclaration(JPlus20Parser.ConstructorDeclarationContext ctx) {
+        List<String> typeNameList = new ArrayList<>();
+        var formalParameterList = ctx.constructorDeclarator().formalParameterList().formalParameter();
+        for (var formalParameterContext : formalParameterList) {
+            String typeName = Utils.getTokenString(formalParameterContext.unannType());
+            typeNameList.add(typeName);
+        }
+
+        String symbolName = "^constructor$_" + typeNameList.stream().collect(Collectors.joining("_"));
+        currentSymbolTable = currentSymbolTable.getEnclosingSymbolTable(symbolName);
+        super.visitConstructorDeclaration(ctx);
+        currentSymbolTable = currentSymbolTable.getParent();
+        return null;
+    }
+
+    @Override
+    public Void visitMethodDeclaration(JPlus20Parser.MethodDeclarationContext ctx) {
+        List<String> typeNameList = new ArrayList<>();
+        var methodDeclarator = ctx.methodHeader().methodDeclarator();
+        var formalParameterList = methodDeclarator.formalParameterList() != null ? methodDeclarator.formalParameterList().formalParameter() : new ArrayList<JPlus20Parser.FormalParameterContext>();
+        for (var formalParameterContext : formalParameterList) {
+            String typeName = Utils.getTokenString(formalParameterContext.unannType());
+            typeNameList.add(typeName);
+        }
+
+        String methodName = Utils.getTokenString(ctx.methodHeader().methodDeclarator().identifier());
+        String symbolName = "^" + methodName + "$_" + typeNameList.stream().collect(Collectors.joining("_"));
+
+        currentSymbolTable = currentSymbolTable.getEnclosingSymbolTable(symbolName);
+        super.visitMethodDeclaration(ctx);
+        currentSymbolTable = currentSymbolTable.getParent();
+        return null;
+    }
+
+    @Override
+    public Void visitFieldDeclaration(JPlus20Parser.FieldDeclarationContext ctx) {
+        for (var variableDeclaratorContext : ctx.variableDeclaratorList().variableDeclarator()) {
+            String symbol = Utils.getTokenString(variableDeclaratorContext.variableDeclaratorId());
+            SymbolInfo symbolInfo = currentSymbolTable.resolve(symbol);
+            TypeInfo typeInfo = symbolInfo.getTypeInfo();
+
+            if (variableDeclaratorContext.variableInitializer() != null) {
+                String expression = Utils.getTokenString(variableDeclaratorContext.variableInitializer());
+
+                if (!typeInfo.isNullable() && "null".equals(expression)) {
+                    int line = ctx.getStart().getLine();
+                    int column = ctx.getStart().getCharPositionInLine();
+                    int offset = ctx.getStart().getStartIndex();
+                    String msg = symbol + " is a non-nullable variable. But null value is assigned to it.";
+                    issues.add(new NullabilityIssue(line, column, offset, msg));
+                    hasPassed = false;
+                }
+            }
+        }
+
+        return super.visitFieldDeclaration(ctx);
+    }
+
+    @Override
+    public Void visitBlock(JPlus20Parser.BlockContext ctx) {
+        currentSymbolTable = currentSymbolTable.getEnclosingSymbolTable("^block$");
+        super.visitBlock(ctx);
+        currentSymbolTable = currentSymbolTable.getParent();
+        return null;
+    }
+
+    @Override
+    public Void visitLocalVariableDeclaration(JPlus20Parser.LocalVariableDeclarationContext ctx) {
+        var variableDeclarator = ctx.variableDeclaratorList().variableDeclarator();
+        for (JPlus20Parser.VariableDeclaratorContext variableDeclaratorContext : variableDeclarator) {
+            String symbol = Utils.getTokenString(variableDeclaratorContext.variableDeclaratorId());
+            SymbolInfo symbolInfo = currentSymbolTable.resolve(symbol);
+            if (symbolInfo != null) {
+                TypeInfo typeInfo = symbolInfo.getTypeInfo();
+                if (variableDeclaratorContext.variableInitializer() != null) {
+                    String expression = Utils.getTokenString(variableDeclaratorContext.variableInitializer());
+                    if (!typeInfo.isNullable() && typeInfo.getType().equals(TypeInfo.Type.Reference) && "null".equals(expression)) {
+                        int line = ctx.getStart().getLine();
+                        int column = ctx.getStart().getCharPositionInLine();
+                        int offset = ctx.getStart().getStartIndex();
+                        String msg = symbol + " is a non-nullable variable. But null value is assigned to it.";
+                        issues.add(new NullabilityIssue(line, column, offset, msg));
+                        hasPassed = false;
+                    }
+                }
+            }
         }
 
         return super.visitLocalVariableDeclaration(ctx);
+    }
+
+    @Override
+    public Void visitAssignment(JPlus20Parser.AssignmentContext ctx) {
+        String variableName = null;
+        if (ctx.leftHandSide().expressionName() != null) {
+            variableName = Utils.getTokenString(ctx.leftHandSide().expressionName());
+        } else if (ctx.leftHandSide().fieldAccess() != null) {
+            variableName = Utils.getTokenString(ctx.leftHandSide().fieldAccess());
+        } else if (ctx.leftHandSide().arrayAccess() != null) {
+            variableName = Utils.getTokenString(ctx.leftHandSide().arrayAccess());
+        }
+
+        String expression = Utils.getTokenString(ctx.expression());
+
+        SymbolInfo symbolInfo = currentSymbolTable.resolve(variableName);
+        if (symbolInfo != null) {
+            TypeInfo typeInfo = symbolInfo.getTypeInfo();
+            if (!typeInfo.isNullable() && typeInfo.getType().equals(TypeInfo.Type.Reference) && "null".equals(expression)) {
+                int line = ctx.getStart().getLine();
+                int column = ctx.getStart().getCharPositionInLine();
+                int offset = ctx.getStart().getStartIndex();
+                String msg = variableName + " is a non-nullable variable. But null value is assigned to it.";
+                issues.add(new NullabilityIssue(line, column, offset, msg));
+                hasPassed = false;
+            }
+        }
+
+        return super.visitAssignment(ctx);
     }
 
     @Override
@@ -84,11 +207,11 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
             String methodName = Utils.getTokenString(ctx.identifier());
             boolean nullsafe = ctx.NULLSAFE() != null;
 
-            SymbolInfo symbolInfo = symbolTable.resolve(instanceName);
+            SymbolInfo symbolInfo = currentSymbolTable.resolve(instanceName);
             if (symbolInfo != null && symbolInfo.getTypeInfo().isNullable() && !nullsafe) {
-                int line = ctx.getStart().getLine();
-                int column = ctx.getStart().getCharPositionInLine();
-                int offset = ctx.getStart().getStartIndex();
+                int line = ctx.start.getLine();
+                int column = ctx.start.getCharPositionInLine();
+                int offset = ctx.start.getStartIndex();
                 String msg = instanceName + " is a nullable variable. But it directly accesses " + methodName + "(). Consider using null-safe operator(?.).";
                 issues.add(new NullabilityIssue(line, column, offset, msg));
                 hasPassed = false;
@@ -104,7 +227,7 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
             String methodName = Utils.getTokenString(ctx.identifier());
             boolean nullsafe = ctx.NULLSAFE() != null;
 
-            SymbolInfo symbolInfo = symbolTable.resolve(instanceName);
+            SymbolInfo symbolInfo = currentSymbolTable.resolve(instanceName);
             if (symbolInfo != null && symbolInfo.getTypeInfo().isNullable() && !nullsafe) {
                 int line = ctx.getStart().getLine();
                 int column = ctx.getStart().getCharPositionInLine();

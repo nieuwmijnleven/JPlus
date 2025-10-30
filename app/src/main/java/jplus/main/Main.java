@@ -16,13 +16,16 @@ import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            System.out.println("Usage: jplus <java file>");
-            return;
-        }
+//        if (args.length != 1) {
+//            System.out.println("Usage: jplus <java file>");
+//            return;
+//        }
 
-        JPlusProcessor processor = new JPlusProcessor(Path.of(args[0]));
+//        JPlusProcessor processor = new JPlusProcessor(Path.of(args[0]));
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./app/src/test/samples/NullsafeWithElvisOperator2.jplus"));
         processor.process();
+        processor.analyzeSymbols();
+
         var issues = processor.checkNullability();
         if (!issues.isEmpty()) {
             issues.forEach(nullabilityIssue -> {
@@ -30,7 +33,7 @@ public class Main {
             });
             return;
         }
-        processor.analyzeSymbols();
+
         String javaCode = processor.generateJavaCode();
         System.out.println(javaCode);
     }

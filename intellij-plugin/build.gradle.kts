@@ -44,6 +44,13 @@ intellijPlatform {
             Initial version
         """.trimIndent()
     }
+
+    pluginVerification {
+        ides {
+            create("IC", "2025.1.4.1") { }
+            create("IC", "2025.2.1") { }
+        }
+    }
 }
 
 tasks {

@@ -12,19 +12,19 @@ public class SymbolInfo {
     private final TextChangeRange range;
     private final String originalText;
     private final List<Modifier> modifierList;
-
     private SymbolTable symbolTable;
 
-    public SymbolInfo(String symbol, TypeInfo typeInfo, TextChangeRange range, String originalText, List<Modifier> modifierList) {
+    public SymbolInfo(String symbol, TypeInfo typeInfo, TextChangeRange range, String originalText, List<Modifier> modifierList, SymbolTable symbolTable) {
         this.symbol = symbol;
         this.typeInfo = typeInfo;
         this.range = range;
         this.originalText = originalText;
         this.modifierList = modifierList;
+        this.symbolTable = symbolTable;
     }
 
-    public SymbolInfo(String symbol, TypeInfo typeInfo, TextChangeRange range, String originalText) {
-        this(symbol, typeInfo, range, originalText, new ArrayList<>());
+    public SymbolInfo(String symbol, TypeInfo typeInfo, TextChangeRange range, String originalText, List<Modifier> modifierList) {
+        this(symbol, typeInfo, range, originalText, modifierList, null);
     }
 
     public String getSymbol() {
@@ -62,5 +62,52 @@ public class SymbolInfo {
                 ", range=" + range +
                 ", originalText='" + originalText + '\'' +
                 '}';
+    }
+
+    public static class Builder {
+        private String symbol;
+        private TypeInfo typeInfo;
+        private TextChangeRange range;
+        private String originalText;
+        private List modifierList;
+        private SymbolTable symbolTable;
+
+        public Builder symbol(String symbol) {
+            this.symbol = symbol;
+            return this;
+        }
+
+        public Builder typeInfo(TypeInfo typeInfo) {
+            this.typeInfo = typeInfo;
+            return this;
+        }
+
+        public Builder range(TextChangeRange range) {
+            this.range = range;
+            return this;
+        }
+
+        public Builder originalText(String originalText) {
+            this.originalText = originalText;
+            return this;
+        }
+
+        public Builder modifierList(List modifierList) {
+            this.modifierList = modifierList;
+            return this;
+        }
+
+        public Builder symbolTable(SymbolTable symbolTable) {
+            this.symbolTable = symbolTable;
+            return this;
+        }
+
+        public SymbolInfo build() {
+            return new SymbolInfo(symbol, typeInfo, range, originalText, modifierList, symbolTable);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 }

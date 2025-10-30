@@ -28,7 +28,16 @@
         <listener class="jplus.plugin.intellij.JPlusSaveListener" topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
     </projectListeners>
 
-    <idea-version since-build="251.*" until-build="252.*"/>
+    <actions>
+        <action id="NewJPlusClass"
+                class="jplus.plugin.intellij.JPlusNewClassAction"
+                text="JPlus Class"
+                description="Create new JPlus class">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+    </actions>
+
+    <idea-version since-build="251"/>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->

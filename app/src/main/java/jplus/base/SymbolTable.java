@@ -24,7 +24,11 @@ public class SymbolTable {
     }
 
     public SymbolInfo resolve(String name) {
-        return symbolMap.get(name);
+        SymbolInfo symbolInfo = symbolMap.get(name);
+        if (symbolInfo == null && parent != null) {
+            symbolInfo = parent.resolve(name);
+        }
+        return symbolInfo;
     }
 
     public boolean contains(String symbol, TypeInfo.Type type) {
