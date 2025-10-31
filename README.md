@@ -42,19 +42,21 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
 
 ---
 
-## 🚀 IntelliJ Plugin Launch – Coming Soon!
+## 🚀 IntelliJ Plugin 0.1 MVP Alpha Release!
 
-We’re thrilled to announce that the **JPlus IntelliJ Plugin** is about to be released! 🎉
+We’re excited to announce the release of **JPlus IntelliJ Plugin (v0.1-mvp-alpha)**! 🎉
 
-This plugin will allow you to:
+**📥 Download:** [intellij-plugin-0.1-mvp-alpha.zip](https://github.com/user-attachments/files/23261877/intellij-plugin-0.1-mvp-alpha.zip)
 
-- Write JPlus code directly in IntelliJ IDEA
-- Enjoy full IDE support including syntax highlighting, code completion, and error checking
-- Seamlessly integrate with your existing Java projects
+## ✨ Key Features
+- **Write JPlus code directly in IntelliJ IDEA**
+- **Full IDE Support**: syntax highlighting, code completion, and error checking
+- **Nullability Checker**: ensures safe handling of null values at compile-time
+- **Seamless Java Integration**: easily use JPlus alongside your existing Java projects
 
-🎥 **Watch the demo video:** [JPlus IntelliJ Plugin Demo](https://youtu.be/0z_aIyBpJso)
+🎥 **Watch the demo video:**  [JPlus IntelliJ Plugin Demo](https://youtu.be/0z_aIyBpJso)
 
-Stay tuned – the plugin will be publicly available very soon! Your feedback and early testing will be invaluable to help us polish it before the official launch.
+Your early feedback will be invaluable in helping us polish the plugin before the official launch. Stay tuned – the public release is coming soon!
 
 ---
 
