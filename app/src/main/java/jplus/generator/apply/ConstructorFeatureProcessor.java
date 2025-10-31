@@ -8,11 +8,16 @@ import jplus.generator.TextChangeRange;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
     @Override
     public void process(ApplyFeatureProcessingContext context) {
         List<String> argumentList = context.getFeature().getArgumentList();
+        if (argumentList.isEmpty()) {
+            throw new IllegalArgumentException("constructor must be used with required, all and no arguments");
+        }
+
         for (String argument : argumentList) {
             if ("no".equalsIgnoreCase(argument)) {
                 processNoArgsConsturctor(context);
@@ -24,8 +29,6 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
                 throw new IllegalArgumentException(argument + "is not valid");
             }
         }
-
-//        ApplyFeatureProcessor.super.process(context);
     }
 
     private void processNoArgsConsturctor(ApplyFeatureProcessingContext context) {
@@ -33,21 +36,20 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
 
         String className = context.getTargetClass();
         SymbolTable classSymbolTable = context.getClassSymbolTable();
-        if (classSymbolTable.resolve("^constructor$") != null) {
+        String constructorName = "^constructor$_";
+        if (classSymbolTable.resolve(constructorName) != null) {
             return;
         }
+
+        TypeInfo typeInfo = new TypeInfo(constructorName, false, TypeInfo.Type.Constructor);
+        SymbolInfo constructorSymInfo = SymbolInfo.builder().symbol(constructorName).typeInfo(typeInfo).build();
+        classSymbolTable.declare(constructorName, constructorSymInfo);
 
         List<String> fieldList = context.getFieldList();
         if (fieldList.isEmpty()) return;
 
-        List<String> nonStaticFieldList = fieldList.stream().map(classSymbolTable::resolve).filter(symbolInfo -> !symbolInfo.getModifierList().contains(Modifier.STATIC)).map(SymbolInfo::getSymbol).toList();
-
-        if (nonStaticFieldList.isEmpty()) return;
-
-        SymbolInfo symbolInfo = classSymbolTable.resolve(fieldList.get(fieldList.size()-1));
-        int endLine = symbolInfo.getRange().endLine();
-        int endIndex = symbolInfo.getRange().inclusiveEndIndex() + 1;
-        TextChangeRange range = new TextChangeRange(endLine, endIndex, endLine, endIndex);
+        boolean hasFinalField = fieldList.stream().map(classSymbolTable::resolve).anyMatch(symbolInfo -> symbolInfo.getModifierList().contains(Modifier.FINAL));
+        if (hasFinalField) return;
 
         String constructor = "\n\n" + "public " + className + "() {}";
         context.appendConstructorPartText(constructor);
@@ -61,37 +63,36 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
         if (fieldList.isEmpty()) return;
 
         SymbolTable classSymbolTable = context.getClassSymbolTable();
-        List<String> nonStaticFieldList = fieldList.stream().map(classSymbolTable::resolve).filter(symbolInfo -> !symbolInfo.getModifierList().contains(Modifier.STATIC)).map(SymbolInfo::getSymbol).toList();
+        List<SymbolInfo> nonStaticFieldList = fieldList.stream().map(classSymbolTable::resolve).filter(symbolInfo -> !symbolInfo.getModifierList().contains(Modifier.STATIC)).toList();
         if (nonStaticFieldList.isEmpty()) return;
 
-        String className = context.getTargetClass();
-        String constructorName = "^constructor$_" + String.join("_", fieldList);
-        if (classSymbolTable.resolve("constructorName") != null) {
+        String nonoStaticTypeNameJoining = nonStaticFieldList.stream().map(SymbolInfo::getTypeInfo).map(TypeInfo::getName).collect(Collectors.joining("_"));
+        String constructorName = "^constructor$_" + nonoStaticTypeNameJoining;
+        if (classSymbolTable.resolve(constructorName) != null) {
             return;
         }
 
-        SymbolInfo symbolInfo = classSymbolTable.resolve(fieldList.get(fieldList.size()-1));
-        int startIndex = symbolInfo.getRange().startIndex();
-        int endLine = symbolInfo.getRange().endLine();
-        int endIndex = symbolInfo.getRange().inclusiveEndIndex() + 1;
-        TextChangeRange range = new TextChangeRange(endLine, endIndex, endLine, endIndex);
+        TypeInfo typeInfo = new TypeInfo(constructorName, false, TypeInfo.Type.Constructor);
+        SymbolInfo constructorSymInfo = SymbolInfo.builder().symbol(constructorName).typeInfo(typeInfo).build();
+        classSymbolTable.declare(constructorName, constructorSymInfo);
+
         String indentation = context.getIndentation();
 
+        String className = context.getTargetClass();
         String constructor = "\n\n" + "public " + className + "(";
 
         List<String> parameters = new ArrayList<>();
-        for (String fieldName : nonStaticFieldList) {
-            TypeInfo typeInfo = classSymbolTable.resolve(fieldName).getTypeInfo();
-            String typeName = typeInfo.getName();
+        for (SymbolInfo symbolInfo : nonStaticFieldList) {
+            String typeName = symbolInfo.getTypeInfo().getName();
+            String fieldName = symbolInfo.getSymbol();
             parameters.add(typeName + " " + fieldName);
         }
         constructor += String.join(", ", parameters);
         constructor += ") {\n";
 
         List<String> assignments = new ArrayList<>();
-        for (String fieldName : nonStaticFieldList) {
-            TypeInfo typeInfo = classSymbolTable.resolve(fieldName).getTypeInfo();
-            String typeName = typeInfo.getName();
+        for (SymbolInfo symbolInfo : nonStaticFieldList) {
+            String fieldName = symbolInfo.getSymbol();
             assignments.add(indentation + "this." + fieldName + " = " + fieldName + ";");
         }
         constructor += String.join("\n", assignments);
@@ -108,48 +109,48 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
         if (fieldList.isEmpty()) return;
 
         SymbolTable classSymbolTable = context.getClassSymbolTable();
-        List<String> nonStaticFieldList = fieldList.stream().map(classSymbolTable::resolve).filter(symbolInfo -> !symbolInfo.getModifierList().contains(Modifier.STATIC)).map(SymbolInfo::getSymbol).toList();
+        List<SymbolInfo> nonStaticFieldList = fieldList.stream().map(classSymbolTable::resolve).filter(symbolInfo -> !symbolInfo.getModifierList().contains(Modifier.STATIC)).toList();
         if (nonStaticFieldList.isEmpty()) return;
 
-        List<String> requiredFieldList = new ArrayList<>();
-        for (String fieldName : nonStaticFieldList) {
-            SymbolInfo symbolInfo = classSymbolTable.resolve(fieldName);
+        List<SymbolInfo> requiredFieldList = new ArrayList<>();
+        for (SymbolInfo symbolInfo : nonStaticFieldList) {
             List<Modifier> modifierList = symbolInfo.getModifierList();
             if (modifierList != null && modifierList.contains(Modifier.FINAL)) {
-                requiredFieldList.add(fieldName);
+                requiredFieldList.add(symbolInfo);
             }
         }
 
         if (requiredFieldList.isEmpty()) return;
 
-        String constructorName = "^constructor$_" + String.join("_", fieldList);
-        if (classSymbolTable.resolve("constructorName") != null) {
+        String requiredTypeNameJoining = requiredFieldList.stream().map(SymbolInfo::getTypeInfo).map(TypeInfo::getName).collect(Collectors.joining("_"));
+        String constructorName = "^constructor$_" + requiredTypeNameJoining;
+        System.out.println("classSymbolTable = " + classSymbolTable);
+        System.out.println("constructorName = " + constructorName);
+        if (classSymbolTable.resolve(constructorName) != null) {
             return;
         }
 
-        SymbolInfo symbolInfo = classSymbolTable.resolve(fieldList.get(fieldList.size()-1));
-        int startIndex = symbolInfo.getRange().startIndex();
-        int endLine = symbolInfo.getRange().endLine();
-        int endIndex = symbolInfo.getRange().inclusiveEndIndex() + 1;
-        TextChangeRange range = new TextChangeRange(endLine, endIndex, endLine, endIndex);
+        TypeInfo typeInfo = new TypeInfo(constructorName, false, TypeInfo.Type.Constructor);
+        SymbolInfo constructorSymInfo = SymbolInfo.builder().symbol(constructorName).typeInfo(typeInfo).build();
+        classSymbolTable.declare(constructorName, constructorSymInfo);
+
         String indentation = context.getIndentation();
 
         String className = context.getTargetClass();
         String constructor = "\n\n" + "public " + className + "(";
 
         List<String> parameters = new ArrayList<>();
-        for (String fieldName : requiredFieldList) {
-            TypeInfo typeInfo = classSymbolTable.resolve(fieldName).getTypeInfo();
-            String typeName = typeInfo.getName();
+        for (SymbolInfo symInfo : requiredFieldList) {
+            String typeName = symInfo.getTypeInfo().getName();
+            String fieldName = symInfo.getSymbol();
             parameters.add(typeName + " " + fieldName);
         }
         constructor += String.join(", ", parameters);
         constructor += ") {\n";
 
         List<String> assignments = new ArrayList<>();
-        for (String fieldName : requiredFieldList) {
-            TypeInfo typeInfo = classSymbolTable.resolve(fieldName).getTypeInfo();
-            String typeName = typeInfo.getName();
+        for (SymbolInfo symInfo : requiredFieldList) {
+            String fieldName = symInfo.getSymbol();
             assignments.add(indentation + "this." + fieldName + " = " + fieldName + ";");
         }
         constructor += String.join("\n", assignments);
