@@ -18,6 +18,7 @@ import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.java.JavaBundle;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidatorEx;
@@ -49,7 +50,7 @@ public class JPlusNewClassAction extends JavaCreateTemplateInPackageAction<PsiCl
     }
 
     protected void buildDialog(@NotNull final Project project, @NotNull PsiDirectory directory, CreateFileFromTemplateDialog.Builder builder) {
-        builder.setTitle(JavaBundle.message("action.create.new.class", new Object[0])).addKind(JavaPsiBundle.message("node.class.tooltip", new Object[0]), IconManager.getInstance().getPlatformIcon(PlatformIcons.Class), "Class").addKind(JavaPsiBundle.message("node.interface.tooltip", new Object[0]), com.intellij.util.PlatformIcons.INTERFACE_ICON, "Interface");
+        builder.setTitle("New JPlus Class").addKind(JavaPsiBundle.message("node.class.tooltip", new Object[0]), IconManager.getInstance().getPlatformIcon(PlatformIcons.Class), "Class").addKind(JavaPsiBundle.message("node.interface.tooltip", new Object[0]), com.intellij.util.PlatformIcons.INTERFACE_ICON, "Interface");
         final LanguageLevel level = PsiUtil.getLanguageLevel(directory);
         if (JavaFeature.RECORDS.isSufficient(level)) {
             builder.addKind(JavaPsiBundle.message("node.record.tooltip", new Object[0]), com.intellij.util.PlatformIcons.RECORD_ICON, "Record");
@@ -112,7 +113,24 @@ public class JPlusNewClassAction extends JavaCreateTemplateInPackageAction<PsiCl
 
     protected final PsiClass doCreate(PsiDirectory dir, String className, String templateName) throws IncorrectOperationException {
         PsiClass psiClass = JavaDirectoryService.getInstance().createClass(dir, className, templateName, true);
-        PsiFile originalFile = psiClass.getContainingFile();
+        return psiClass;
+    }
+
+    protected PsiElement getNavigationElement(@NotNull PsiClass createdElement) {
+        if (createdElement.isRecord()) {
+            PsiRecordHeader header = createdElement.getRecordHeader();
+            if (header != null) {
+                return header.getLastChild();
+            }
+        }
+
+        return createdElement.getLBrace();
+    }
+
+    protected void postProcess(@NotNull PsiClass createdElement, String templateName, Map<String, String> customProperties) {
+        super.postProcess(createdElement, templateName, customProperties);
+
+        PsiFile originalFile = createdElement.getContainingFile();
         VirtualFile originalVFile = originalFile.getVirtualFile();
 
         if (originalVFile != null) {
@@ -131,29 +149,17 @@ public class JPlusNewClassAction extends JavaCreateTemplateInPackageAction<PsiCl
                             jplusFile.setBinaryContent(content);
                         }
 
-                        originalVFile.delete(this);
+                        VirtualFile finalJplusFile = jplusFile;
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            FileEditorManager.getInstance(project).openFile(finalJplusFile, true);
+                        });
+
+//                        originalVFile.delete(this);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 });
             });
         }
-
-        return psiClass;
-    }
-
-    protected PsiElement getNavigationElement(@NotNull PsiClass createdElement) {
-        if (createdElement.isRecord()) {
-            PsiRecordHeader header = createdElement.getRecordHeader();
-            if (header != null) {
-                return header.getLastChild();
-            }
-        }
-
-        return createdElement.getLBrace();
-    }
-
-    protected void postProcess(@NotNull PsiClass createdElement, String templateName, Map<String, String> customProperties) {
-        super.postProcess(createdElement, templateName, customProperties);
     }
 }
