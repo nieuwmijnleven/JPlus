@@ -16,13 +16,12 @@ import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-//        if (args.length != 1) {
-//            System.out.println("Usage: jplus <java file>");
-//            return;
-//        }
+        if (args.length != 1) {
+            System.out.println("Usage: jplus <java file>");
+            return;
+        }
 
-//        JPlusProcessor processor = new JPlusProcessor(Path.of(args[0]));
-        JPlusProcessor processor = new JPlusProcessor(Path.of("./app/src/test/samples/NullsafeWithElvisOperator2.jplus"));
+        JPlusProcessor processor = new JPlusProcessor(Path.of(args[0]));
         processor.process();
         processor.analyzeSymbols();
 

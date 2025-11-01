@@ -17,28 +17,24 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
   Fully utilizes existing Java libraries and frameworks
 
 - **Enhances Development Productivity**  
-  Automates null checks, supports type inference, lambdas, and other modern features
+  Automates null checks, supports boilerplate code generating syntax and other modern features
 
 - **Allows Gradual Adoption**  
   Existing Java code can remain unchanged while selectively adopting JPlus syntax
 
-- **Compiles to Java Bytecode**  
-  Ensures stable execution and high performance on the JVM
-
+- **Compiles to Plain Java Code**  
+  Converts JPlus syntax into clean, version-flexible Java code that runs on any standard Java compiler or JVM without extra dependencies.
 
 ---
 
 ## 🛠️ Key Features
 
-| Feature                      | Description                                            |
-|------------------------------|--------------------------------------------------------|
-| **Strict Null Checking**      | Prevents null reference errors at compile time         |
-| **Type Inference**            | Automatically infers types without explicit declarations |
-| **Data Classes / Immutable Objects** | Minimizes boilerplate code                             |
-| **Lambda and Higher-Order Functions** | Enables functional programming style                   |
-| **Pattern Matching**          | Simplifies conditional and type checks                 |
-| **Asynchronous Syntax**       | Simple async/await-style asynchronous handling         |
-| **Concise Syntax**            | smart casts and more for clearer and shorter code      |
+| Feature                               | Description                                          |
+|---------------------------------------|------------------------------------------------------|
+| **Strict Null Checking**              | Prevents null reference errors at compile time       |
+| **Boilerplate Code Genererating**     | Minimizes boilerplate code                           |
+| **Asynchronous Syntax**               | Simple async/await-style asynchronous handling       |
+| **Concise Syntax**                    | smart casts and more for clearer and shorter code    |
 
 ---
 
@@ -46,13 +42,15 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
 
 We’re excited to announce the release of **JPlus IntelliJ Plugin (v0.1-mvp-alpha)**! 🎉
 
-**📥 Download:** [intellij-plugin-0.1-mvp-alpha.zip](https://github.com/user-attachments/files/23261877/intellij-plugin-0.1-mvp-alpha.zip)
+**📥 Download:** [intellij-plugin-0.1-mvp-alpha.zip](https://github.com/user-attachments/files/23281990/intellij-plugin-0.1-mvp-alpha.zip)
 
 ## ✨ Key Features
 - **Write JPlus code directly in IntelliJ IDEA**
 - **Full IDE Support**: syntax highlighting, code completion, and error checking
 - **Nullability Checker**: ensures safe handling of null values at compile-time
 - **Seamless Java Integration**: easily use JPlus alongside your existing Java projects
+
+![jplus-intellij-plugin-demo](https://github.com/user-attachments/assets/2f65cbb3-e239-4d85-869f-8ed3e30c809a)
 
 🎥 **Watch the demo video:**  [JPlus IntelliJ Plugin Demo](https://youtu.be/0z_aIyBpJso)
 
@@ -67,21 +65,19 @@ JPlus introduces a powerful new **`apply` syntax** to replace common boilerplate
 ---
 
 ### 🔍 Overview
-
-| Lombok Annotation           | Equivalent `apply` Syntax                    |
-|----------------------------|----------------------------------------------|
-| `@Data`                    | `data`                                       |
-| `@Getter`                  | `getter`                                     |
-| `@Setter`                  | `setter`                                     |
-| `@EqualsAndHashCode`       | `equals`, `hashCode` or combined `equality` |
-| `@ToString`                | `toString`                                   |
-| `@NoArgsConstructor`       | `constructors(no)`                           |
-| `@AllArgsConstructor`      | `constructors(all)`                          |
-| `@RequiredArgsConstructor` | `constructors(required)`                     |
-| `@Builder`                 | `builder`                                    |
-| `@Value`                   | `value` or `immutable`                        |
-| `@Accessors(fluent=true)`  | `accessors(fluent)`                          |
-| `@Slf4j` / `@Log`          | `logger(slf4j)` / `logger(java)`             |
+| JPlus `apply` Syntax                     | Equivalent Lombok Annotation          |
+|------------------------------------------|--------------------------------------|
+| `data`                                   | `@Data`                              |
+| `getter`                                 | `@Getter`                            |
+| `setter`                                 | `@Setter`                            |
+| `equals`, `hashCode` or combined `equality` | `@EqualsAndHashCode`              |
+| `toString`                               | `@ToString`                          |
+| `constructors(no)`                       | `@NoArgsConstructor`                 |
+| `constructors(all)`                      | `@AllArgsConstructor`                |
+| `constructors(required)`                 | `@RequiredArgsConstructor`           |
+| `builder`                                | `@Builder`                           |
+| `value` or `immutable`                   | `@Value`                             | |
+| `logger(slf4j)` / `logger(java)`         | `@Slf4j` / `@Log`                    |
 
 > Additional method-level and delegation features are also supported.
 
@@ -158,7 +154,7 @@ cd JPlus
 
 Use the Gradle wrapper to build the compiler and run examples:
 ```bash
-./gradlew build
+./gradlew app:build
 ```
 
 ---
