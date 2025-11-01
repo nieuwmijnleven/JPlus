@@ -238,11 +238,11 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
                 if (unannReferenceType.unannClassOrInterfaceType() != null) {
                     typeInfoBuilder.name(Utils.getTokenString(unannReferenceType.unannClassOrInterfaceType()));
                     typeInfoBuilder.isNullable(nullable);
-                    typeInfoBuilder.type(TypeInfo.Type.Class);
+                    typeInfoBuilder.type(TypeInfo.Type.Reference);
                 } else if (unannReferenceType.unannTypeVariable() != null) {
                     typeInfoBuilder.name(Utils.getTokenString(unannReferenceType.unannTypeVariable()));
                     typeInfoBuilder.isNullable(nullable);
-                    typeInfoBuilder.type(TypeInfo.Type.Class);
+                    typeInfoBuilder.type(TypeInfo.Type.Reference);
                 } else if (unannReferenceType.unannArrayType() != null) {
                     typeInfoBuilder.name(Utils.getTokenString(unannReferenceType.unannArrayType()));
                     typeInfoBuilder.isNullable(nullable);
