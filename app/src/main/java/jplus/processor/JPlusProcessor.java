@@ -81,11 +81,18 @@ public class JPlusProcessor {
         }
 
         String generated = parseTree.getText();
-        TextChangeRange generatedRange = Utils.computeTextChangeRange(generated, 0, generated.length()-1);
+        int startIndex = parseTree.start.getStartIndex();
+        int stopIndex = parseTree.stop.getStopIndex();
+        TextChangeRange generatedRange = Utils.computeTextChangeRange(originalText, startIndex, stopIndex);
         FragmentedText fragmentedText = new FragmentedText(generatedRange, generated);
+
         BoilerplateCodeGenerator generator = new BoilerplateCodeGenerator(symbolTable, fragmentedText);
         generator.visit(parseTree);
-        return generator.generate();
+        String javaCode = generator.generate();
+
+        FragmentedText fragmentedTextForOriginalText = new FragmentedText(originalTextRange, originalText);
+        fragmentedTextForOriginalText.update(generatedRange, javaCode);
+        return fragmentedTextForOriginalText.toString();
     }
 
     public String compile() {

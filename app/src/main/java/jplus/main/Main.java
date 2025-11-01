@@ -1,16 +1,6 @@
 package jplus.main;
 
-import jplus.analyzer.NullabilityChecker;
-import jplus.analyzer.SymbolAnalyzer;
-import jplus.base.JPlus20Lexer;
-import jplus.base.JPlus20Parser;
-import jplus.base.SymbolTable;
-import jplus.generator.BoilerplateCodeGenerator;
-import jplus.generator.JPlusParserRuleContext;
 import jplus.processor.JPlusProcessor;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.nio.file.Path;
 

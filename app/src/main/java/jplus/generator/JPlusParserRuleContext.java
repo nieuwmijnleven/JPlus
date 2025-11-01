@@ -1,10 +1,14 @@
 package jplus.generator;
 
-import jplus.base.JPlus20Parser.*;
+import jplus.base.JPlus20Parser.ApplyDeclarationContext;
+import jplus.base.JPlus20Parser.FieldAccessContext;
+import jplus.base.JPlus20Parser.MethodInvocationContext;
+import jplus.base.JPlus20Parser.NullCoalescingExpressionContext;
+import jplus.base.JPlus20Parser.PrimaryNoNewArrayContext;
+import jplus.base.JPlus20Parser.UnannTypeContext;
 import jplus.util.FragmentedText;
 import jplus.util.Utils;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.Interval;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,7 +102,7 @@ public class JPlusParserRuleContext extends ParserRuleContext {
     }
 
     private String processDefaultText() {
-        String originalString = Utils.getTokenString(this);
+        String contextString = Utils.getTokenString(this);
 
         // force children to compute text and update map if needed
         for (int i = 0; i < getChildCount(); i++) {
@@ -106,12 +110,12 @@ public class JPlusParserRuleContext extends ParserRuleContext {
         }
 
         if (textChangeRangeStringMap.isEmpty()) {
-            return originalString;
+            return contextString;
         }
 
         String originalText = this.start.getInputStream().toString();
         TextChangeRange range = Utils.getTextChangeRange(originalText, this);
-        FragmentedText fragmentedText = new FragmentedText(range, originalString);
+        FragmentedText fragmentedText = new FragmentedText(range, contextString);
         textChangeRangeStringMap.forEach(fragmentedText::update);
         _getParent().ifPresent(parent -> parent.addTextChangeRange(range, fragmentedText.toString()));
         return fragmentedText.toString();

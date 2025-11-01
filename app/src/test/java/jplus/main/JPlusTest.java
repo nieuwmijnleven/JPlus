@@ -108,9 +108,6 @@ class JPlusTest {
         checkGeneratedCode("./src/test/samples/NullsafeWithElvisOperator.jplus", "EQeqIo9gt+H9pgoBDDsVPiRXH0E=");
     }
 
-
-
-
     @Test
     void testApplyGetter() throws Exception {
         checkGeneratedCode("./src/test/samples/ApplyGetter.jplus", "2KehX1uPY6NqXQiwDyed7V5y5SQ=");
@@ -192,7 +189,7 @@ class JPlusTest {
         }
 
         String generatedJavaCode = processor.generateJavaCode();
-//        System.err.println(generatedJavaCode);
+//        System.err.println("generated = " + generatedJavaCode);
         processor = new JPlusProcessor(generatedJavaCode);
         processor.process();
 
