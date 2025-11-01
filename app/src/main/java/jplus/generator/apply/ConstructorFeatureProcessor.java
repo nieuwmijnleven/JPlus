@@ -37,7 +37,7 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
         String className = context.getTargetClass();
         SymbolTable classSymbolTable = context.getClassSymbolTable();
         String constructorName = "^constructor$_";
-        if (classSymbolTable.resolve(constructorName) != null) {
+        if (classSymbolTable.resolveInCurrent(constructorName) != null) {
             return;
         }
 
@@ -68,7 +68,7 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
 
         String nonoStaticTypeNameJoining = nonStaticFieldList.stream().map(SymbolInfo::getTypeInfo).map(TypeInfo::getName).collect(Collectors.joining("_"));
         String constructorName = "^constructor$_" + nonoStaticTypeNameJoining;
-        if (classSymbolTable.resolve(constructorName) != null) {
+        if (classSymbolTable.resolveInCurrent(constructorName) != null) {
             return;
         }
 
@@ -126,7 +126,7 @@ public class ConstructorFeatureProcessor implements ApplyFeatureProcessor {
         String constructorName = "^constructor$_" + requiredTypeNameJoining;
         System.out.println("classSymbolTable = " + classSymbolTable);
         System.out.println("constructorName = " + constructorName);
-        if (classSymbolTable.resolve(constructorName) != null) {
+        if (classSymbolTable.resolveInCurrent(constructorName) != null) {
             return;
         }
 

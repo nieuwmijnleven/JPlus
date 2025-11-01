@@ -1,0 +1,13 @@
+apply getter;
+apply {
+    User.Profile: getter;
+}
+
+public class User {
+    private String name;
+    private int age;
+
+    public class Profile {
+        String nickname;
+    }
+}

@@ -1,0 +1,14 @@
+apply constructor(all), builder;
+apply {
+    User.Profile: constructor(all), builder;
+}
+
+public class User {
+    private String name;
+    private final int age;
+
+    public static class Profile {
+        String nickname;
+        final int age;
+    }
+}

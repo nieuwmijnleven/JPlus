@@ -1,0 +1,13 @@
+apply equality;
+apply {
+    User.Profile: equality;
+}
+
+public class User {
+    private String name;
+    private int age;
+
+    public class Profile {
+        String nickname;
+    }
+}

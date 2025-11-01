@@ -1,0 +1,21 @@
+package jplus.example;
+
+public class User {
+    private String? firstname;
+    private String lastname = null;
+    private int age;
+
+    public void setName(String? fullname) {
+        String[] tokens = fullname.split(fullname, ",");
+        firstname = tokens[0];
+        lastname = null;
+    }
+
+    public int getFirstnameLen() {
+        return firstname.length();
+    }
+
+    public int getLastnameLen() {
+        return lastname.length();
+    }
+}

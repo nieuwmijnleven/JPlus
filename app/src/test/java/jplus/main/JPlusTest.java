@@ -1,19 +1,11 @@
 package jplus.main;
 
-import jplus.analyzer.NullabilityChecker;
-import jplus.base.JPlus20Lexer;
-import jplus.base.JPlus20Parser;
-import jplus.generator.JPlusParserRuleContext;
 import jplus.processor.JPlusProcessor;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -40,33 +32,12 @@ class JPlusTest {
         System.setOut(new PrintStream(originalOut));
     }
 
-    private record ParseResult(JPlusParserRuleContext parseTree, JPlus20Parser parser){
-        String toParseTreeString() {
-            return parseTree.toStringTree(parser);
-        }
-    }
-
-    private ParseResult getParseResult(CharStream input) {
-        JPlus20Lexer lexer = new JPlus20Lexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        JPlus20Parser parser = new JPlus20Parser(tokens);
-        return new ParseResult(parser.start_(), parser);
-    }
-
-    private ParseResult createParseTreeFromFile(String fileName) throws IOException {
-        CharStream input = CharStreams.fromFileName(fileName);
-        return getParseResult(input);
-    }
-
-    private ParseResult createParseTreeFromString(String code) throws IOException {
-        CharStream input = CharStreams.fromString(code);
-        return getParseResult(input);
-    }
-
     @Test
     void testNullableType1() throws Exception {
         JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullableType1.jplus"));
         processor.process();
+        processor.analyzeSymbols();
+
         var issues = processor.checkNullability();
         if (!issues.isEmpty()) {
             issues.forEach(nullabilityIssue -> {
@@ -82,6 +53,8 @@ class JPlusTest {
     void testNullableType2() throws Exception {
         JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullableType2.jplus"));
         processor.process();
+        processor.analyzeSymbols();
+
         var issues = processor.checkNullability();
         if (!issues.isEmpty()) {
             issues.forEach(nullabilityIssue -> {
@@ -91,6 +64,28 @@ class JPlusTest {
         }
 
         assertEquals("Error: (line:8, column:8) s1 is a nullable variable. But it direct accesses to length(). You must consider to use null-safe operator(?.)\n", outContent.toString());
+    }
+
+    @Test
+    void testNullabilityChecker1() throws Exception {
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullabilityChecker1.jplus"));
+        processor.process();
+        processor.analyzeSymbols();
+
+        var issues = processor.checkNullability();
+        if (!issues.isEmpty()) {
+            issues.forEach(nullabilityIssue -> {
+                System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
+            });
+            return;
+        }
+
+        String expected = "Error: (line:5, column:4) lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:9, column:26) fullname is a nullable variable. But it directly accesses split(). Consider using null-safe operator(?.).\n" +
+                "Error: (line:11, column:8) lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:15, column:15) firstname is a nullable variable. But it directly accesses length(). Consider using null-safe operator(?.).\n";
+
+        assertEquals(expected, outContent.toString());
     }
 
     @Test
@@ -113,34 +108,125 @@ class JPlusTest {
         checkGeneratedCode("./src/test/samples/NullsafeWithElvisOperator.jplus", "EQeqIo9gt+H9pgoBDDsVPiRXH0E=");
     }
 
-    private void checkGeneratedCode(String fileName, String expected) throws IOException, NoSuchAlgorithmException {
-        ParseResult parseResult = createParseTreeFromFile(fileName);
-        NullabilityChecker nullabilityChecker = new NullabilityChecker();
-        nullabilityChecker.visit(parseResult.parseTree);
-        if (!nullabilityChecker.hasPassed()) {
+
+
+
+    @Test
+    void testApplyGetter() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyGetter.jplus", "2KehX1uPY6NqXQiwDyed7V5y5SQ=");
+    }
+
+    @Test
+    void testApplySetter() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplySetter.jplus", "Q3LnhpGWKx1+rCJd5qFDg1XPiEg=");
+    }
+
+    @Test
+    void testApplyEquals() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyEquals.jplus", "jN/DMdHIgKyDAs11SRYagASygi0=");
+    }
+
+    @Test
+    void testApplyEquality() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyEquality.jplus", "+2gyKfUyySc1XkRvw14TFuasdUo=");
+    }
+
+    @Test
+    void testApplyData() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyData.jplus", "LYAPBouq1JKIktjRfP4ImUzs080=");
+    }
+
+    @Test
+    void testApplyToString() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyToString.jplus", "3WXjcqipwTO+F7/0KS/GSYQtIE4=");
+    }
+
+    @Test
+    void testApplyHashCode() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyHashCode.jplus", "FiHLi04TBUW4bDxmWsfSNLklKGg=");
+    }
+
+    @Test
+    void testApplyConstructorWithRequired() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyConstructorWithRequired.jplus", "gQSG/fieVXDm6m4/LcO0FojTI5U=");
+    }
+
+    @Test
+    void testApplyConstructorWithAll() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyConstructorWithAll.jplus", "NjPcw+ydxvus5tvXDc53hdhqnAU=");
+    }
+
+    @Test
+    void testApplyConstructorWithNo() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyConstructorWithNo.jplus", "yZtUmt/+VIn8dxshd7pNCR0wJ/8=");
+    }
+
+    @Test
+    void testApplyConstructorWithAllAndBuilder() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyConstructorWithAllAndBuilder.jplus", "pY9jEWiq5yX/urk0RZcNMDjMsQc=");
+    }
+
+    @Test
+    void testApplyConstructorWithRequiredAndBuilder() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyConstructorWithRequiredAndBuilder.jplus", "Oh4/D9SMOiOZmqtBH+KJf8l7PBw=");
+    }
+
+    @Test
+    void testApplyConstructorWithNoAndBuilder() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyConstructorWithNoAndBuilder.jplus", "pY9jEWiq5yX/urk0RZcNMDjMsQc=");
+    }
+
+    @Test
+    void testApplyDuplicatedHashCode() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyDuplicatedHashCode.jplus", "FiHLi04TBUW4bDxmWsfSNLklKGg=");
+    }
+
+    private void checkGeneratedCode(String fileName, String expected) throws Exception {
+        JPlusProcessor processor = new JPlusProcessor(Path.of(fileName));
+        processor.process();
+        processor.analyzeSymbols();
+
+        var issues = processor.checkNullability();
+        if (!issues.isEmpty()) {
             fail();
         }
 
-        String generatedJavaCode = parseResult.parseTree.getText();
-        parseResult = createParseTreeFromString(generatedJavaCode);
-        String parseTreeString = parseResult.toParseTreeString();
+        String generatedJavaCode = processor.generateJavaCode();
+//        System.err.println(generatedJavaCode);
+        processor = new JPlusProcessor(generatedJavaCode);
+        processor.process();
 
-        MessageDigest messageDigest = MessageDigest.getInstance("sha-1");
-        byte[] hash = messageDigest.digest(parseTreeString.getBytes(StandardCharsets.UTF_8));
-        String hashString = Base64.getEncoder().encodeToString(hash);
+        String parseTreeString = processor.getParseTreeString();
+        String hashString = getHashString(parseTreeString);
 
         assertEquals(expected, hashString);
     }
 
+    private String getHashString(String s) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance("sha-1");
+        byte[] hash = messageDigest.digest(s.getBytes(StandardCharsets.UTF_8));
+        String hashString = Base64.getEncoder().encodeToString(hash);
+        return hashString;
+    }
+
     @Test
     void testCodeGeneration() throws Exception {
-        ParseResult parseResult = createParseTreeFromFile("./src/test/samples/TestExample.java");
-        String parseTreeString  = parseResult.toParseTreeString();
-        String javaCode = parseResult.parseTree.getText();
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/TestExample.java"));
+        processor.process();
+        processor.analyzeSymbols();
 
-        ParseResult parseResultByCodeGenerator = createParseTreeFromString(javaCode);
-        String parseTreeStringByCodeGenerator = parseResultByCodeGenerator.toParseTreeString();
+        var issues = processor.checkNullability();
+        if (!issues.isEmpty()) {
+            fail();
+        }
 
-        assertEquals(parseTreeString, parseTreeStringByCodeGenerator);
+        String parseTreeString = processor.getParseTreeString();
+        String generatedJavaCode = processor.generateJavaCode();
+
+        processor = new JPlusProcessor(generatedJavaCode);
+        processor.process();
+        String parseTreeStringOfGeneratedJavaCode = processor.getParseTreeString();
+
+        assertEquals(parseTreeString, parseTreeStringOfGeneratedJavaCode);
     }
 }

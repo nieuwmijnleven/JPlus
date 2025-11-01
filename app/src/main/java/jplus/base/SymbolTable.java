@@ -31,6 +31,10 @@ public class SymbolTable {
         return symbolInfo;
     }
 
+    public SymbolInfo resolveInCurrent(String name) {
+        return symbolMap.get(name);
+    }
+
     public boolean contains(String symbol, TypeInfo.Type type) {
         SymbolInfo symbolInfo = resolve(symbol);
         if (symbolInfo != null && symbolInfo.getTypeInfo().getType() == type) {

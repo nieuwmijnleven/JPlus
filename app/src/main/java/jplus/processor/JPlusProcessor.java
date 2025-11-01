@@ -44,7 +44,13 @@ public class JPlusProcessor {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         parser = new JPlus20Parser(tokens);
         parseTree = parser.start_();
-//        System.out.println(parseTree.toStringTree(parser));
+    }
+
+    public String getParseTreeString() {
+        if (parseTree == null) {
+            throw new IllegalStateException("Call process() first.");
+        }
+        return parseTree.toStringTree(parser);
     }
 
     public List<NullabilityChecker.NullabilityIssue> checkNullability() {

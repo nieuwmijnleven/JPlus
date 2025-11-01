@@ -1,0 +1,13 @@
+apply tostring;
+apply {
+    User.Profile: tostring;
+}
+
+public class User {
+    private String name;
+    private int age;
+
+    public class Profile {
+        String nickname;
+    }
+}
