@@ -8,7 +8,7 @@ import java.util.List;
 
 public class SymbolInfo {
     private final String symbol;
-    private final TypeInfo typeInfo;
+    private TypeInfo typeInfo;
     private final TextChangeRange range;
     private final String originalText;
     private final List<Modifier> modifierList;
@@ -35,6 +35,10 @@ public class SymbolInfo {
         return typeInfo;
     }
 
+    public void setTypeInfo(TypeInfo typeInfo) {
+        this.typeInfo = typeInfo;
+    }
+
     public TextChangeRange getRange() {
         return range;
     }
@@ -53,6 +57,17 @@ public class SymbolInfo {
 
     public void setSymbolTable(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
+    }
+
+    public static SymbolInfo copyOf(SymbolInfo src) {
+        return SymbolInfo.builder()
+                .symbol(src.symbol)
+                .typeInfo(src.typeInfo)
+                .originalText(src.originalText)
+                .range(src.range)
+                .modifierList(src.modifierList)
+                .symbolTable(src.symbolTable)
+                .build();
     }
 
     @Override

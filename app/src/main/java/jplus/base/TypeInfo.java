@@ -2,7 +2,7 @@ package jplus.base;
 
 public class TypeInfo {
     public final String name;
-    public final boolean isNullable;
+    public boolean isNullable;
     public final Type type;
 
     public enum Type {
@@ -12,9 +12,8 @@ public class TypeInfo {
         Primitive,
         Constructor,
         Array,
-        Unknown
+        Unknown;
     }
-
     public TypeInfo(String name, boolean isNullable, Type type) {
         this.name = name;
         this.isNullable = isNullable;
@@ -29,8 +28,20 @@ public class TypeInfo {
         return isNullable;
     }
 
+    public void setNullable(boolean isNullable) {
+        this.isNullable = isNullable;
+    }
+
     public Type getType() {
         return type;
+    }
+
+    public static TypeInfo copyOf(TypeInfo src) {
+        return TypeInfo.builder()
+                .name(src.name)
+                .isNullable(src.isNullable)
+                .type((src.type))
+                .build();
     }
 
     @Override

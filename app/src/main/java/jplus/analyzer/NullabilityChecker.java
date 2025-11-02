@@ -184,6 +184,11 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
         String expression = Utils.getTokenString(ctx.expression());
 
+        int thisIndex = variableName.indexOf("this");
+        if (thisIndex != -1) {
+            variableName = variableName.substring(thisIndex + "this".length() + 1);
+        }
+
         SymbolInfo symbolInfo = currentSymbolTable.resolve(variableName);
         if (symbolInfo != null) {
             TypeInfo typeInfo = symbolInfo.getTypeInfo();
@@ -198,6 +203,31 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
         }
 
         return super.visitAssignment(ctx);
+    }
+
+    @Override
+    public Void visitEqualityExpression(JPlus20Parser.EqualityExpressionContext ctx) {
+        if (ctx.NOTEQUAL() != null) {
+            String variableName = Utils.getTokenString(ctx.equalityExpression());
+            String value = Utils.getTokenString(ctx.relationalExpression());
+            if ("null".equals(value)) {
+                SymbolInfo symbolInfo = currentSymbolTable.resolve(variableName);
+                if (symbolInfo != null) {
+                    TypeInfo typeInfo = symbolInfo.getTypeInfo();
+                    if (typeInfo.isNullable) {
+                        TypeInfo newTypeInfo = TypeInfo.copyOf(typeInfo);
+                        newTypeInfo.setNullable(false);
+
+                        SymbolInfo newSymbolInfo = SymbolInfo.copyOf(symbolInfo);
+                        newSymbolInfo.setTypeInfo(newTypeInfo);
+
+                        currentSymbolTable.declare(variableName, newSymbolInfo);
+                    }
+                }
+            }
+        }
+
+        return super.visitEqualityExpression(ctx);
     }
 
     @Override
@@ -223,18 +253,20 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
     @Override
     public Void visitPrimaryNoNewArray(JPlus20Parser.PrimaryNoNewArrayContext ctx) {
         if (ctx.typeName() != null) {
-            String instanceName = Utils.getTokenString(ctx.typeName());
-            String methodName = Utils.getTokenString(ctx.identifier());
-            boolean nullsafe = ctx.NULLSAFE() != null;
+            if (ctx.THIS() == null) {
+                String instanceName = Utils.getTokenString(ctx.typeName());
+                String methodName = Utils.getTokenString(ctx.identifier());
+                boolean nullsafe = ctx.NULLSAFE() != null;
 
-            SymbolInfo symbolInfo = currentSymbolTable.resolve(instanceName);
-            if (symbolInfo != null && symbolInfo.getTypeInfo().isNullable() && !nullsafe) {
-                int line = ctx.getStart().getLine();
-                int column = ctx.getStart().getCharPositionInLine();
-                int offset = ctx.getStart().getStartIndex();
-                String msg = instanceName + " is a nullable variable. But it directly accesses " + methodName + "(). Consider using null-safe operator(?.).";
-                issues.add(new NullabilityIssue(line, column, offset, msg));
-                hasPassed = false;
+                SymbolInfo symbolInfo = currentSymbolTable.resolve(instanceName);
+                if (symbolInfo != null && symbolInfo.getTypeInfo().isNullable() && !nullsafe) {
+                    int line = ctx.getStart().getLine();
+                    int column = ctx.getStart().getCharPositionInLine();
+                    int offset = ctx.getStart().getStartIndex();
+                    String msg = instanceName + " is a nullable variable. But it directly accesses " + methodName + "(). Consider using null-safe operator(?.).";
+                    issues.add(new NullabilityIssue(line, column, offset, msg));
+                    hasPassed = false;
+                }
             }
         }
         return super.visitPrimaryNoNewArray(ctx);

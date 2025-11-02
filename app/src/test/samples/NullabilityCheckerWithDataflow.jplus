@@ -6,9 +6,11 @@ public class User {
     private int age;
 
     public void setName(String? fullname) {
-        String[] tokens = fullname.split(fullname, ",");
-        firstname = tokens[0];
-        lastname = null;
+        if (fullname != null) {
+            String[] tokens = fullname.split(fullname, ",");
+            firstname = tokens[0];
+            lastname = null;
+        }
     }
 
     public int getFirstnameLen() {

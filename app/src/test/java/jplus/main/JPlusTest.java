@@ -43,7 +43,6 @@ class JPlusTest {
             issues.forEach(nullabilityIssue -> {
                 System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
             });
-            return;
         }
 
         assertEquals("Error: (line:6, column:8) s2 is a non-nullable variable. But null value is assigned to it.\n", outContent.toString());
@@ -60,16 +59,17 @@ class JPlusTest {
             issues.forEach(nullabilityIssue -> {
                 System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
             });
-            return;
         }
 
-        assertEquals("Error: (line:8, column:8) s1 is a nullable variable. But it direct accesses to length(). You must consider to use null-safe operator(?.)\n", outContent.toString());
+        assertEquals("Error: (line:8, column:8) s1 is a nullable variable. But it directly accesses length(). Consider using null-safe operator(?.).\n", outContent.toString());
     }
 
+
     @Test
-    void testNullabilityChecker1() throws Exception {
-        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullabilityChecker1.jplus"));
+    void testNullabilityChecker() throws Exception {
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullabilityChecker.jplus"));
         processor.process();
+//        System.err.println(processor.getParseTreeString());
         processor.analyzeSymbols();
 
         var issues = processor.checkNullability();
@@ -77,13 +77,35 @@ class JPlusTest {
             issues.forEach(nullabilityIssue -> {
                 System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
             });
-            return;
         }
 
         String expected = "Error: (line:5, column:4) lastname is a non-nullable variable. But null value is assigned to it.\n" +
                 "Error: (line:9, column:26) fullname is a nullable variable. But it directly accesses split(). Consider using null-safe operator(?.).\n" +
-                "Error: (line:11, column:8) lastname is a non-nullable variable. But null value is assigned to it.\n" +
-                "Error: (line:15, column:15) firstname is a nullable variable. But it directly accesses length(). Consider using null-safe operator(?.).\n";
+                "Error: (line:13, column:8) lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:14, column:8) lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:15, column:8) lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:19, column:15) firstname is a nullable variable. But it directly accesses length(). Consider using null-safe operator(?.).\n";
+
+        assertEquals(expected, outContent.toString());
+    }
+
+    @Test
+    void testNullabilityCheckerWithDataflow() throws Exception {
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullabilityCheckerWithDataflow.jplus"));
+        processor.process();
+//        System.err.println(processor.getParseTreeString());
+        processor.analyzeSymbols();
+
+        var issues = processor.checkNullability();
+        if (!issues.isEmpty()) {
+            issues.forEach(nullabilityIssue -> {
+                System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
+            });
+        }
+
+        String expected = "Error: (line:5, column:4) lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:12, column:12) lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:17, column:15) firstname is a nullable variable. But it directly accesses length(). Consider using null-safe operator(?.).\n";
 
         assertEquals(expected, outContent.toString());
     }
@@ -181,6 +203,7 @@ class JPlusTest {
     private void checkGeneratedCode(String fileName, String expected) throws Exception {
         JPlusProcessor processor = new JPlusProcessor(Path.of(fileName));
         processor.process();
+//        System.err.println(processor.getParseTreeString());
         processor.analyzeSymbols();
 
         var issues = processor.checkNullability();
