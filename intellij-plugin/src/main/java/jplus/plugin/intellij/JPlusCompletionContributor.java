@@ -7,9 +7,12 @@ import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.codeInsight.completion.JavaCompletionContributor;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import jplus.plugin.intellij.psi.ApplyBlockPsiElement;
@@ -39,7 +42,8 @@ public class JPlusCompletionContributor extends CompletionContributor {
 
                 collectApplyCandidates(psiElement, result);
 
-                PsiFile javaPsiFile = JPlusUtil.createJavaPsiFromJPlus(project, jplusFile);
+                PsiJavaFile javaPsiFile = (PsiJavaFile) PsiFileFactory.getInstance(project)
+                        .createFileFromText("Temp.java", JavaFileType.INSTANCE, jplusFile.getText());
                 if (javaPsiFile != null) {
                     invokeJavaCompletion(javaPsiFile, parameters, result);
                 }
