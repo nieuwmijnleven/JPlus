@@ -35,6 +35,12 @@
                 description="Create new JPlus class">
             <add-to-group group-id="NewGroup" anchor="first"/>
         </action>
+        <action id="ConvertToJPlusAction"
+                class="jplus.plugin.intellij.ConvertToJPlusAction"
+                text="Convert to JPlus"
+                description="Convert Java file to JPlus file">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+        </action>
     </actions>
 
     <idea-version since-build="251"/>
