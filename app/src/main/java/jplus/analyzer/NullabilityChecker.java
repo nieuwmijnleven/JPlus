@@ -173,32 +173,51 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
 
     @Override
     public Void visitAssignment(JPlus20Parser.AssignmentContext ctx) {
-        String variableName = null;
+        String fullVariableName = null;
         if (ctx.leftHandSide().expressionName() != null) {
-            variableName = Utils.getTokenString(ctx.leftHandSide().expressionName());
+            fullVariableName = Utils.getTokenString(ctx.leftHandSide().expressionName());
         } else if (ctx.leftHandSide().fieldAccess() != null) {
-            variableName = Utils.getTokenString(ctx.leftHandSide().fieldAccess());
+            fullVariableName = Utils.getTokenString(ctx.leftHandSide().fieldAccess());
         } else if (ctx.leftHandSide().arrayAccess() != null) {
-            variableName = Utils.getTokenString(ctx.leftHandSide().arrayAccess());
+            fullVariableName = Utils.getTokenString(ctx.leftHandSide().arrayAccess());
         }
 
         String expression = Utils.getTokenString(ctx.expression());
 
-        int thisIndex = variableName.indexOf("this");
+        SymbolInfo symbolInfo = null;
+        String variableName;
+        int thisIndex = fullVariableName.indexOf("this");
         if (thisIndex != -1) {
-            variableName = variableName.substring(thisIndex + "this".length() + 1);
+            variableName = fullVariableName.substring(thisIndex + "this".length() + 1);
+            symbolInfo = currentSymbolTable.getParent().getParent().resolve(variableName);
+        } else {
+            symbolInfo = currentSymbolTable.resolve(fullVariableName);
         }
 
-        SymbolInfo symbolInfo = currentSymbolTable.resolve(variableName);
         if (symbolInfo != null) {
             TypeInfo typeInfo = symbolInfo.getTypeInfo();
-            if (!typeInfo.isNullable() && typeInfo.getType().equals(TypeInfo.Type.Reference) && "null".equals(expression)) {
-                int line = ctx.getStart().getLine();
-                int column = ctx.getStart().getCharPositionInLine();
-                int offset = ctx.getStart().getStartIndex();
-                String msg = variableName + " is a non-nullable variable. But null value is assigned to it.";
-                issues.add(new NullabilityIssue(line, column, offset, msg));
-                hasPassed = false;
+            if (!typeInfo.isNullable() && typeInfo.getType().equals(TypeInfo.Type.Reference)) {
+                if ("null".equals(expression)) {
+                    int line = ctx.getStart().getLine();
+                    int column = ctx.getStart().getCharPositionInLine();
+                    int offset = ctx.getStart().getStartIndex();
+                    String msg = fullVariableName + " is a non-nullable variable. But null value is assigned to it.";
+                    issues.add(new NullabilityIssue(line, column, offset, msg));
+                    hasPassed = false;
+                } else {
+                    SymbolInfo rhsSymbolInfo = currentSymbolTable.resolve(expression);
+                    if (rhsSymbolInfo != null) {
+                        TypeInfo rhsTypeInfo = rhsSymbolInfo.getTypeInfo();
+                        if (typeInfo.getType().equals(TypeInfo.Type.Reference) && rhsTypeInfo.getType().equals(TypeInfo.Type.Reference) && !typeInfo.isNullable && rhsTypeInfo.isNullable) {
+                            int line = ctx.getStart().getLine();
+                            int column = ctx.getStart().getCharPositionInLine();
+                            int offset = ctx.getStart().getStartIndex();
+                            String msg = "cannot assign " + expression + "(nullable) to " + fullVariableName + "(non-nullable).";
+                            issues.add(new NullabilityIssue(line, column, offset, msg));
+                            hasPassed = false;
+                        }
+                    }
+                }
             }
         }
 

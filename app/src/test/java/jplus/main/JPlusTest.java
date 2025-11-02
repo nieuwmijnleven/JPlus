@@ -82,8 +82,8 @@ class JPlusTest {
         String expected = "Error: (line:5, column:4) lastname is a non-nullable variable. But null value is assigned to it.\n" +
                 "Error: (line:9, column:26) fullname is a nullable variable. But it directly accesses split(). Consider using null-safe operator(?.).\n" +
                 "Error: (line:13, column:8) lastname is a non-nullable variable. But null value is assigned to it.\n" +
-                "Error: (line:14, column:8) lastname is a non-nullable variable. But null value is assigned to it.\n" +
-                "Error: (line:15, column:8) lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:14, column:8) this.lastname is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:15, column:8) User.this.lastname is a non-nullable variable. But null value is assigned to it.\n" +
                 "Error: (line:19, column:15) firstname is a nullable variable. But it directly accesses length(). Consider using null-safe operator(?.).\n";
 
         assertEquals(expected, outContent.toString());
@@ -107,6 +107,24 @@ class JPlusTest {
                 "Error: (line:12, column:12) lastname is a non-nullable variable. But null value is assigned to it.\n" +
                 "Error: (line:17, column:15) firstname is a nullable variable. But it directly accesses length(). Consider using null-safe operator(?.).\n";
 
+        assertEquals(expected, outContent.toString());
+    }
+
+    @Test
+    void testNullabilityCheckerWithAssignNullableToNonNullable() throws Exception {
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullabilityCheckerWithAssignNullableToNonNullable.jplus"));
+        processor.process();
+//        System.err.println(processor.getParseTreeString());
+        processor.analyzeSymbols();
+
+        var issues = processor.checkNullability();
+        if (!issues.isEmpty()) {
+            issues.forEach(nullabilityIssue -> {
+                System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
+            });
+        }
+
+        String expected = "Error: (line:8, column:8) cannot assign name(nullable) to this.name(non-nullable).\n";
         assertEquals(expected, outContent.toString());
     }
 
