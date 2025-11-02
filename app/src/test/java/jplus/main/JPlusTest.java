@@ -181,6 +181,11 @@ class JPlusTest {
     }
 
     @Test
+    void testApplyConstructorWithNoInSingleClass() throws Exception {
+        checkGeneratedCode("./src/test/samples/ApplyConstructorWithNoInSingleClass.jplus", "wRkgs8GUxa2qJcMTsiTiPkOU9M0=");
+    }
+
+    @Test
     void testApplyConstructorWithAllAndBuilder() throws Exception {
         checkGeneratedCode("./src/test/samples/ApplyConstructorWithAllAndBuilder.jplus", "pY9jEWiq5yX/urk0RZcNMDjMsQc=");
     }
@@ -212,7 +217,6 @@ class JPlusTest {
         }
 
         String generatedJavaCode = processor.generateJavaCode();
-//        System.err.println("generated = " + generatedJavaCode);
         processor = new JPlusProcessor(generatedJavaCode);
         processor.process();
 

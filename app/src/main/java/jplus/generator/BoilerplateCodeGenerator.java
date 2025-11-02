@@ -130,7 +130,7 @@ public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
             SymbolInfo symbolInfo = enclosingSymbolTable.resolve(targetClass);
             TextChangeRange range = symbolInfo.getRange();
             String classText = symbolInfo.getOriginalText();
-            TextChangeRange newRange = new TextChangeRange(
+            TextChangeRange methodRange = new TextChangeRange(
                     range.endLine(), range.inclusiveEndIndex(),
                     range.endLine(), range.inclusiveEndIndex()
             );
@@ -151,9 +151,10 @@ public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
             String doubleIndentation = Utils.indent(" ", baseIndent * 2);
 
             symbolInfo = classSymbolTable.resolve(fieldList.get(fieldList.size()-1));
+            boolean isNullable = symbolInfo.getTypeInfo().isNullable();
             int constructorIndent = symbolInfo.getRange().startIndex();
             int endLine = symbolInfo.getRange().endLine();
-            int endIndex = symbolInfo.getRange().inclusiveEndIndex() + 1;
+            int endIndex = symbolInfo.getRange().inclusiveEndIndex() + (isNullable ? 0 : 1);
             TextChangeRange constructorRange = new TextChangeRange(endLine, endIndex, endLine, endIndex);
 
             ApplyFeatureProcessingContext context = processedClassActionContextMap.computeIfAbsent(qualifiedName, k -> {
@@ -181,7 +182,7 @@ public class BoilerplateCodeGenerator extends JPlus20ParserBaseVisitor<Void> {
             }
 
             String replacedText = Utils.indentLines(context.getMethodPartText(), indent) + Utils.indentLines("\n}", indent - baseIndent);
-            fragmentedText.update(newRange, replacedText);
+            fragmentedText.update(methodRange, replacedText);
 
             replacedText = Utils.indentLines(context.getConstructorPartText(), constructorIndent) + "\n";
             fragmentedText.update(constructorRange, replacedText);

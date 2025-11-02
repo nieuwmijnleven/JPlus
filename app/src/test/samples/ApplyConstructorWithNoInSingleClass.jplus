@@ -1,0 +1,5 @@
+apply constructor(no);
+
+public class User {
+    private String? name;
+}
