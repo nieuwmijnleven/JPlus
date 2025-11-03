@@ -129,6 +129,24 @@ class JPlusTest {
     }
 
     @Test
+    void testNullabilityCheckerWithNonInitializeLocalVariable() throws Exception {
+        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/NullabilityCheckerLocalVariable.jplus"));
+        processor.process();
+//        System.err.println(processor.getParseTreeString());
+        processor.analyzeSymbols();
+
+        var issues = processor.checkNullability();
+        if (!issues.isEmpty()) {
+            issues.forEach(nullabilityIssue -> {
+                System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
+            });
+        }
+
+        String expected = "Error: (line:6, column:8) nickname is a non-nullable variable. But null value is assigned to it.\n";
+        assertEquals(expected, outContent.toString());
+    }
+
+    @Test
     void testNullsafeOperator() throws Exception {
         checkGeneratedCode("./src/test/samples/NullsafeOperator.jplus", "jmllRsMo+kZOWnmV1fd9mexA77M=");
     }

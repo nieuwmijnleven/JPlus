@@ -33,12 +33,12 @@
                 class="jplus.plugin.intellij.JPlusNewClassAction"
                 text="JPlus Class"
                 description="Create new JPlus class">
-            <add-to-group group-id="NewGroup" anchor="first"/>
+            <add-to-group group-id="NewGroup1" anchor="after" relative-to-action="NewClass"/>
         </action>
         <action id="ConvertToJPlusAction"
                 class="jplus.plugin.intellij.ConvertToJPlusAction"
-                text="Convert to JPlus"
-                description="Convert Java file to JPlus file">
+                text="Convert Java File to JPlus File"
+                description="Convert Java File to JPlus File">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
         </action>
     </actions>

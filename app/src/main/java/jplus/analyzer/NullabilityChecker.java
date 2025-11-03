@@ -134,7 +134,6 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
                 }
             }
         }
-
         return super.visitFieldDeclaration(ctx);
     }
 
@@ -157,6 +156,15 @@ public class NullabilityChecker extends JPlus20ParserBaseVisitor<Void> {
                 if (variableDeclaratorContext.variableInitializer() != null) {
                     String expression = Utils.getTokenString(variableDeclaratorContext.variableInitializer());
                     if (!typeInfo.isNullable() && typeInfo.getType().equals(TypeInfo.Type.Reference) && "null".equals(expression)) {
+                        int line = ctx.getStart().getLine();
+                        int column = ctx.getStart().getCharPositionInLine();
+                        int offset = ctx.getStart().getStartIndex();
+                        String msg = symbol + " is a non-nullable variable. But null value is assigned to it.";
+                        issues.add(new NullabilityIssue(line, column, offset, msg));
+                        hasPassed = false;
+                    }
+                } else {
+                    if (!typeInfo.isNullable() && typeInfo.getType().equals(TypeInfo.Type.Reference)) {
                         int line = ctx.getStart().getLine();
                         int column = ctx.getStart().getCharPositionInLine();
                         int offset = ctx.getStart().getStartIndex();
