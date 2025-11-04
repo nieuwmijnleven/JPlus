@@ -42,7 +42,7 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
 
 We’re excited to announce the release of **JPlus IntelliJ Plugin (v0.1-mvp-alpha)**! 🎉
 
-**📥 Download:** [intellij-plugin-0.1-mvp-alpha.zip](https://github.com/user-attachments/files/23301129/intellij-plugin-0.1-mvp-alpha.zip)
+**📥 Download:** [intellij-plugin-0.1-mvp-alpha.zip](https://github.com/user-attachments/files/23329066/intellij-plugin-0.1-mvp-alpha.zip)
 
 
 ## ✨ Key Features
