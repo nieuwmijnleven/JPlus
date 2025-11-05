@@ -1,6 +1,7 @@
 package jplus.generator;
 
 import jplus.base.JPlus20Parser.ApplyDeclarationContext;
+import jplus.base.JPlus20Parser.ExpressionNameContext;
 import jplus.base.JPlus20Parser.FieldAccessContext;
 import jplus.base.JPlus20Parser.MethodInvocationContext;
 import jplus.base.JPlus20Parser.NullCoalescingExpressionContext;
@@ -44,6 +45,8 @@ public class JPlusParserRuleContext extends ParserRuleContext {
             return replaceNullsafeOperator(fieldAccessCtx);
         } else if (this instanceof MethodInvocationContext methodInvocationCtx && methodInvocationCtx.NULLSAFE() != null) {
             return replaceNullsafeOperator(methodInvocationCtx);
+        } else if (this instanceof ExpressionNameContext expressionNameContext && expressionNameContext.NULLSAFE() != null) {
+            return replaceNullsafeOperator(expressionNameContext);
         }
 
         return processDefaultText();

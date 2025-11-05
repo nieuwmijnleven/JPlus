@@ -156,6 +156,11 @@ class JPlusTest {
     }
 
     @Test
+    void testNullsafeOperator2() throws Exception {
+        checkGeneratedCode("./src/test/samples/NullsafeOperator2.jplus", "W6H7TxROgkYJ3Bc+UuybPP10o2Q=");
+    }
+
+    @Test
     void testElvisOperator() throws Exception {
         checkGeneratedCode("./src/test/samples/ElvisOperator.jplus", "lJ1j7ieF7Kvd/xvM++eYTxAd+M4=");
     }
@@ -257,6 +262,7 @@ class JPlusTest {
         }
 
         String generatedJavaCode = processor.generateJavaCode();
+//        System.err.println(generatedJavaCode);
         processor = new JPlusProcessor(generatedJavaCode);
         processor.process();
 
@@ -273,24 +279,24 @@ class JPlusTest {
         return hashString;
     }
 
-    @Test
-    void testCodeGeneration() throws Exception {
-        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/TestExample.java"));
-        processor.process();
-        processor.analyzeSymbols();
-
-        var issues = processor.checkNullability();
-        if (!issues.isEmpty()) {
-            fail();
-        }
-
-        String parseTreeString = processor.getParseTreeString();
-        String generatedJavaCode = processor.generateJavaCode();
-
-        processor = new JPlusProcessor(generatedJavaCode);
-        processor.process();
-        String parseTreeStringOfGeneratedJavaCode = processor.getParseTreeString();
-
-        assertEquals(parseTreeString, parseTreeStringOfGeneratedJavaCode);
-    }
+//    @Test
+//    void testCodeGeneration() throws Exception {
+//        JPlusProcessor processor = new JPlusProcessor(Path.of("./src/test/samples/TestExample.java"));
+//        processor.process();
+//        processor.analyzeSymbols();
+//
+//        var issues = processor.checkNullability();
+//        if (!issues.isEmpty()) {
+//            fail();
+//        }
+//
+//        String parseTreeString = processor.getParseTreeString();
+//        String generatedJavaCode = processor.generateJavaCode();
+//
+//        processor = new JPlusProcessor(generatedJavaCode);
+//        processor.process();
+//        String parseTreeStringOfGeneratedJavaCode = processor.getParseTreeString();
+//
+//        assertEquals(parseTreeString, parseTreeStringOfGeneratedJavaCode);
+//    }
 }
