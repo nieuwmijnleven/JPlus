@@ -258,7 +258,7 @@ packageOrTypeName
     ;
 
 expressionName
-    : (ambiguousName '.')? identifier
+    : (ambiguousName ('.'|'?.'))? identifier
     ;
 
 methodName
@@ -266,7 +266,7 @@ methodName
     ;
 
 ambiguousName
-    : identifier ('.' ambiguousName)?
+    : identifier (('.'|'?.') ambiguousName)?
     // left recursion --> right recursion
     ;
 

@@ -110,7 +110,7 @@ public class SymbolAnalyzer extends JPlus20ParserBaseVisitor<Void> {
         }
 
         String symbolName = "^constructor$_" + typeNameList.stream().collect(Collectors.joining("_"));
-//        System.out.println("constructor = " + symbolName);
+//        System.err.println("constructor = " + symbolName);
         TypeInfo typeInfo = new TypeInfo(symbolName, false, TypeInfo.Type.Constructor);
         TextChangeRange range = Utils.getTextChangeRange(this.originalText, ctx);
         String rangeText = Utils.getTokenString(ctx);

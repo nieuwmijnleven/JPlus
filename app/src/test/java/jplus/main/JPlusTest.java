@@ -139,10 +139,14 @@ class JPlusTest {
         if (!issues.isEmpty()) {
             issues.forEach(nullabilityIssue -> {
                 System.out.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
+//                System.err.printf("Error: (line:%d, column:%d) %s\n", nullabilityIssue.getLine(), nullabilityIssue.getColumn(), nullabilityIssue.getMessage());
             });
         }
 
-        String expected = "Error: (line:6, column:8) nickname is a non-nullable variable. But null value is assigned to it.\n";
+        String expected = "Error: (line:18, column:15) address is a nullable variable. But it directly accesses city. Consider using null-safe operator(?.).\n" +
+                "Error: (line:37, column:8) nickName is a non-nullable variable. But null value is assigned to it.\n" +
+                "Error: (line:42, column:21) The 1st argument of the User constructor is a non-nullable variable, but a null value is assigned to it.\n" +
+                "Error: (line:42, column:36) The 1st argument of the Address constructor is a non-nullable variable, but a null value is assigned to it.\n";
         assertEquals(expected, outContent.toString());
     }
 

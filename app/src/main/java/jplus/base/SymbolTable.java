@@ -35,6 +35,10 @@ public class SymbolTable {
         return symbolMap.get(name);
     }
 
+    public boolean isEmpty() {
+        return symbolMap.isEmpty();
+    }
+
     public boolean contains(String symbol, TypeInfo.Type type) {
         SymbolInfo symbolInfo = resolve(symbol);
         if (symbolInfo != null && symbolInfo.getTypeInfo().getType() == type) {
@@ -61,6 +65,19 @@ public class SymbolTable {
     public SymbolTable getEnclosingSymbolTable(String name) {
         return enclosing.computeIfAbsent(name, s -> new SymbolTable((this)));
 //        return enclosing.getOrDefault(name, new SymbolTable(this));
+    }
+
+    public SymbolTable findLowContextSymbolTable(String name) {
+        if (!symbolMap.containsKey(name)) {
+            SymbolTable found = null;
+            for (SymbolTable symbolTable : enclosing.values()) {
+                if ((found = symbolTable.findLowContextSymbolTable(name)) != null) {
+                    return found;
+                }
+            }
+            return new SymbolTable(null);
+        }
+        return enclosing.get(name);
     }
 
     @Override
