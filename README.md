@@ -1,15 +1,15 @@
 # 🚀 JPlus
 
-> A Java superset language running on the JVM,  
-> **JPlus** is a modern programming language that significantly boosts developer productivity while fully leveraging the existing Java ecosystem.
+A perfect Java-compatible superset language offering modern safety and expressiveness.
+With JPlus, you can enhance your Java code’s safety and expressiveness without rewriting it, while fully leveraging existing Java libraries and tools.
 
 ---
 
 ## ✨ Project Overview
 
-JPlus is fully compatible with Java, offering modern language features like null safety, type inference, and functional programming to reduce developer burden and maximize productivity.
+JPlus is fully compatible with Java, offering modern language features like null safety, boilerplate code generation and other modern language features to reduce developer burden and maximize productivity.
 
-Notably, **there is currently no ‘superset’ language that keeps Java syntax almost intact while extending the language with features like null checks at the language level.** JPlus aims to fill this gap, providing a language that existing Java developers can naturally learn and adopt.
+Notably, **there is currently no ‘superset’ language that keeps Java syntax almost intact while extending the language with features like null checks at the language level.** JPlus aims to fill this gap, providing a language that existing **Java developers can naturally learn and adopt**.
 
 ### Why JPlus?
 
