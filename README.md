@@ -1,4 +1,8 @@
-# 🚀 JPlus
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nieuwmijnleven/JPlus/refs/heads/master/intellij-plugin/src/main/resources/META-INF/pluginIcon.svg" alt="Logo" width="200">
+</p>
+
+# <img src="https://raw.githubusercontent.com/nieuwmijnleven/JPlus/refs/heads/master/intellij-plugin/src/main/resources/META-INF/pluginIcon.svg" alt="Logo" width="25" style="vertical-align: middle;"> JPlus
 
 A perfect Java-compatible superset language offering modern safety and expressiveness.
 With JPlus, you can enhance your Java code’s safety and expressiveness without rewriting it, while fully leveraging existing Java libraries and tools.
