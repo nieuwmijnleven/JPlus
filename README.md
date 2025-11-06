@@ -38,6 +38,12 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
 
 ---
 
+## ✨ Tutorials
+
+- [Writing Java Code Safely and Smartly with Null-Safety Using JPlus](https://jplus.hashnode.dev/writing-java-code-safely-and-smartly-with-null-safety-using-jplus)
+
+---
+
 ## 🚀 IntelliJ Plugin 0.1 MVP Alpha Release!
 
 We’re excited to announce the release of **JPlus IntelliJ Plugin (v0.1-mvp-alpha)**! 🎉
