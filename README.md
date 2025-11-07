@@ -35,18 +35,20 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
 
 ## 🛠️ Key Features
 
-| Feature                               | Description                                          |
-|---------------------------------------|------------------------------------------------------|
-| **Strict Null Checking**              | Prevents null reference errors at compile time       |
-| **Boilerplate Code Genererating**     | Minimizes boilerplate code                           |
-| **Asynchronous Syntax**               | Simple async/await-style asynchronous handling       |
-| **Concise Syntax**                    | smart casts and more for clearer and shorter code    |
+| Feature                           | Description                                          |
+|-----------------------------------|------------------------------------------------------|
+| **Strict Null Checking**          | Prevents null reference errors at compile time       |
+| **Boilerplate Code Genererating** | Minimizes boilerplate code                           |
+| **Named Parameter (Planned)**     | Allows passing arguments by name                     |
+| **Asynchronous Syntax (Planned)** | Simple async/await-style asynchronous handling       |
+| **Concise Syntax (Planned)**      | smart casts and more for clearer and shorter code    |
 
 ---
 
 ## ✨ Tutorials
 
-- [Writing Java Code Safely and Smartly with Null-Safety Using JPlus](https://jplus.hashnode.dev/writing-java-code-safely-and-smartly-with-null-safety-using-jplus)
+- [Make Your Java Code Null-Safe Without Rewriting](https://jplus.hashnode.dev/writing-java-code-safely-and-smartly-with-null-safety-using-jplus)
+- [Try `apply` in JPlus with built-in boilerplate elimination](https://jplus.hashnode.dev/tired-of-lombok-try-apply-in-jplus-with-built-in-boilerplate-elimination)
 
 ---
 
@@ -54,8 +56,12 @@ Notably, **there is currently no ‘superset’ language that keeps Java syntax 
 
 We’re excited to announce the release of **JPlus IntelliJ Plugin (v0.1-mvp-alpha)**! 🎉
 
-**📥 Download:** [intellij-plugin-0.1-mvp-alpha.zip](https://github.com/user-attachments/files/23362382/intellij-plugin-0.1-mvp-alpha.zip)
+The JPlus IntelliJ plugin has been officially released on the JetBrains Marketplace.
+- Go to **File > Settings > Plugins** and search for "JPlus" to install it.
 
+<img width="658" height="214" alt="image" src="https://github.com/user-attachments/assets/51a7fad2-7a28-428f-8a75-82e80c985b4f" />
+
+---
 
 ## ✨ Key Features
 - **Write JPlus code directly in IntelliJ IDEA**
@@ -68,6 +74,22 @@ We’re excited to announce the release of **JPlus IntelliJ Plugin (v0.1-mvp-alp
 🎥 **Watch the demo video:**  [JPlus IntelliJ Plugin Demo](https://youtu.be/0z_aIyBpJso)
 
 Your early feedback will be invaluable in helping us polish the plugin before the official launch. Stay tuned – the public release is coming soon!
+
+---
+
+## 🧩 Upcoming Feature: Named Parameters
+
+We’re working on adding **Named Parameter** support to JPlus — a modern syntax feature that makes method calls more readable and expressive.
+
+```java
+// Example (planned syntax)
+User.create(name: "Anouk", age: 25);
+```
+
+With named parameters, you can clearly indicate the meaning of each argument, reducing ambiguity and improving code readability — especially in methods with multiple parameters.
+
+> 💡 Stay tuned!<br>
+> This feature will be available in an upcoming release.
 
 ---
 
@@ -711,8 +733,8 @@ Thank you for helping us build a better, safer, and more productive programming 
 
 ---
 
-## 📄 License
+## 🌟 Thanks to my sponsor!
 
-JPlus is licensed under the [Apache License 2.0](./LICENSE).
+Special thanks to [@shocklateboy92](https://github.com/shocklateboy92) for supporting this project through GitHub Sponsors!
 
 ---
